@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package BDD;
+package Model;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -54,8 +54,8 @@ public class Connexion {
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
         }
-        catch(Exception e){
-            e.printStackTrace();
+        catch(ClassNotFoundException e){
+        
         }
         
       
@@ -74,6 +74,15 @@ public class Connexion {
 
         // création d'un ordre SQL (statement)
         stmt = conn.createStatement();
+           
+    }
+    
+    /**
+     * Méthode qui affiche toutes les promos
+     * 
+     * @throws SQLException 
+     */
+    public void afficherPromo() throws SQLException{
         
         String myQuery = ("Select * from promotion");
         
@@ -84,11 +93,18 @@ public class Connexion {
             System.out.println(rset.getString("Nom"));
         }
         
+    }
+    
+    /**
+     * Méthode qui met un terme à la connexion à la bdd en cours
+     * 
+     * @throws SQLException 
+     */
+    public void closeConnexion() throws SQLException{
+        
         stmt.close();
         
         conn.close();
-
-
     }
     
 }

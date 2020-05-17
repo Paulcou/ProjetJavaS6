@@ -3,16 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projets6;
+package Controller;
 
-import BDD.*;
+import Model.*;
+import View.*;
 import java.sql.SQLException;
 
 /**
  *
  * @author paulc
  */
-public class ProjetS6 {
+public class NewMain {
 
     /**
      * @param args the command line arguments
@@ -22,7 +23,13 @@ public class ProjetS6 {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         // TODO code application logic here
         
-        Connexion c = new Connexion("edt","root","");
+        /**Connexion c = new Connexion("edt","root","");
+        
+        c.afficherPromo();
+        
+        c.closeConnexion();*/
+        
+        Fenetre f = new Fenetre();
         
     }
     
