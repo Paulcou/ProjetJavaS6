@@ -29,7 +29,7 @@ public class NewMain {
         
         c.closeConnexion();*/
         
-        Fenetre f = new Fenetre();
+        PageConnexion f = new PageConnexion();
         
     }
     

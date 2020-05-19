@@ -107,4 +107,40 @@ public class Connexion {
         conn.close();
     }
     
+    public int checkLogin(String login, String pwd) throws SQLException{
+        
+        String myQuery;
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+login+"'";
+        
+        String checkPwd = "";
+        
+        try{
+            rset = stmt.executeQuery(myQuery);
+                   
+            boolean next = rset.next();
+            
+            if(!next){
+                return 2;
+            }
+            
+            while(next)
+            {
+                checkPwd = rset.getString("Passwd");
+                next = rset.next();
+            }
+        }
+        catch(SQLException e){
+            //System.out.println("non login");
+            return 2;
+        }
+        
+        if(checkPwd.equals(pwd)){
+            //System.out.println("YOUHOU");
+            return 1;
+        }else{
+            //System.out.println("non pwd");
+            return 3;
+        }
+    }
+    
 }

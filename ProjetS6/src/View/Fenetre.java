@@ -10,6 +10,7 @@ package View;
 */
 
 import Model.*;
+import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
 
 /*
  * 
@@ -27,45 +28,60 @@ import java.util.logging.Logger;
  *
  * @author paulc
  */
-public class Fenetre extends JFrame implements ActionListener, ItemListener {
+public class Fenetre {//extends JFrame implements ActionListener, ItemListener {
+
+    
     /*
      * Attribut privés : objets de Connexion, AWT et Swing
      * 
      */
 
     private Connexion maconnexion;
-    private final JLabel tab, req, res, lignes;
-    private final JLabel nameBDD, requeteLabel;
-    private final JTextField requeteTexte, nameBDDTexte;
-    private final JButton exec, local;
-    private final java.awt.List listeDeTables, listeDeRequetes;
-    private final JTextArea fenetreLignes, fenetreRes;
-    private final JPanel p0, p1, nord, p2, p3;
+    private static String userEmail;
+    private JLabel tab;
+    private JLabel req;
+    private static JLabel res, lignes, id, edt;
+    //private final JLabel nameBDD, requeteLabel;
+    //private final JTextField requeteTexte, nameBDDTexte;
+    private static JButton btnConnexion;//, btnRecherche;
+    //private final java.awt.List listeDeTables, listeDeRequetes;
+    //private final JTextArea fenetreLignes, fenetreRes;
+    //private final JPanel p0;//, p1, nord, p2, p3;
 
     /**
      * Constructeur qui initialise tous les objets graphiques de la fenetre
+     * @param email
      */
-    public Fenetre() {
+    public Fenetre(String email) {
 
         // creation par heritage de la fenetre
-        super("Projet d'utilisation de JDBC dans MySQL");
-
+        //super("Projet d'utilisation de JDBC dans MySQL");
+        
+        userEmail = email;
+        
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                createAndShowGUI();
+            }
+        });
         // mise en page (layout) de la fenetre visible
-        setLayout(new BorderLayout());
-        setBounds(0, 0, 1000, 800);
-        setResizable(true);
-        setVisible(true);
+        
+        
 
         // creation des boutons
         //connect = new JButton("Connexion ECE");
-        local = new JButton("Connexion locale");
-        exec = new JButton("Executer");
+        
+       /* btnRecherche = new JButton("Rechercher");
 
         // creation des listes pour les tables et les requetes
         listeDeTables = new java.awt.List(10, false);
         listeDeRequetes = new java.awt.List(10, false);
 
         // creation des textes
+        
+        
+        
 
         nameBDDTexte = new JTextField();
         fenetreLignes = new JTextArea();
@@ -81,8 +97,10 @@ public class Fenetre extends JFrame implements ActionListener, ItemListener {
         requeteLabel = new JLabel("Entrez votre requete de sélection :", JLabel.CENTER);
 
         // creation des panneaux
-        p0 = new JPanel();
-        p1 = new JPanel();
+        
+        */
+        
+        /*p1 = new JPanel();
         nord = new JPanel();
         p2 = new JPanel();
         p3 = new JPanel();
@@ -96,9 +114,9 @@ public class Fenetre extends JFrame implements ActionListener, ItemListener {
 
         // ajout des objets graphqiues dans les panneaux
 
-        p0.add(nameBDD);
-        p0.add(nameBDDTexte);
-        p0.add(local);
+        p0.add(edt);
+        p0.add(id);
+        p0.add(btnConnexion);
         p1.add(tab);
         p1.add(lignes);
         p1.add(req);
@@ -111,11 +129,11 @@ public class Fenetre extends JFrame implements ActionListener, ItemListener {
         p2.add(fenetreRes);
         p3.add(requeteLabel);
         p3.add(requeteTexte);
-        p3.add(exec);
+        p3.add(btnRecherche);
 
         // ajout des listeners
-        exec.addActionListener(this);
-        local.addActionListener(this);
+        btnConnexion.addActionListener(this);
+        btnRecherche.addActionListener(this);
         listeDeTables.addItemListener(this);
         listeDeRequetes.addItemListener(this);
 
@@ -133,15 +151,63 @@ public class Fenetre extends JFrame implements ActionListener, ItemListener {
         // disposition geographique des panneaux
         add("North", nord);
         add("Center", p2);
-        add("South", p3);
+        add("South", p3);*/
+        
+        //pack();
+        //setVisible(true);
 
         // pour fermer la fenetre
+        
+    }
+    
+    private static void addComponentsToPane(Container p0) {
+        
+        p0 = new JPanel();
+        p0.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        
+        c.fill = GridBagConstraints.HORIZONTAL;
+        
+        edt = new JLabel("Emploi du temps",JLabel.CENTER);
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = 0;
+        p0.add(edt, c);
+        
+        id = new JLabel(userEmail,JLabel.CENTER);
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 1;
+        c.gridy = 0;
+        p0.add(id, c);
+        
+        btnConnexion = new JButton("Se déconnecter");
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 2;
+        c.gridy = 0;
+        p0.add(btnConnexion, c);
+        
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent evt) {
                 System.exit(0); // tout fermer												System.exit(0); // tout fermer
             }
         });
+    }
+    
+    private static void createAndShowGUI() {
+        //Create and set up the window.
+        JFrame frame = new JFrame("GridBagLayoutDemo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Set up the content pane.
+        addComponentsToPane(frame.getContentPane());
+
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
     }
 
     /**
@@ -235,19 +301,18 @@ public class Fenetre extends JFrame implements ActionListener, ItemListener {
     /**
      *
      * Afficher les requetes de selection et de MAJ dans la fenetre
+     * @param e
      */
-    public void afficherRequetes() {
+    /*public void afficherRequetes() {
         for (String requete : maconnexion.requetes) {
             listeDeRequetes.add(requete);
         }
     }
-
-    @Override
+    */
     public void actionPerformed(ActionEvent e) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
     public void itemStateChanged(ItemEvent e) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
