@@ -5,8 +5,16 @@
  */
 package Model;
 
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 /**
@@ -141,6 +149,287 @@ public class Connexion {
             //System.out.println("non pwd");
             return 3;
         }
+    }
+    
+    /**
+     *
+     * @param login
+     * @return
+     * @throws SQLException
+     */
+    public ArrayList allSeances(String login) throws SQLException{
+        
+        ArrayList<Carte> allCartes;
+        allCartes = new ArrayList<>();
+        
+        String myQuery;
+        
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+login+"'";
+        
+        int ID = -1;
+        int droit = -1;
+        
+        rset = stmt.executeQuery(myQuery);
+                   
+        boolean next = rset.next();
+
+        while(next)
+        {
+            ID = rset.getInt("ID");
+            droit = rset.getInt("Droit");
+            next = rset.next();
+        }
+        
+        if(droit==4){
+            
+            myQuery = "Select * from etudiant where etudiant.ID_Utilisateur = "+ID;
+            
+            int ID_Groupe = -1;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                ID_Groupe = rset.getInt("ID_Groupe");
+            }
+            
+            //OKOKOKOKSystem.out.println("ID G: "+ID_Groupe);
+            
+            myQuery = "Select * from seance_groupes where seance_groupes.ID_Groupe = "+ID_Groupe;
+            
+            ArrayList seancesIDs = new ArrayList();
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seancesIDs.add(rset.getInt("ID_Seance"));
+            }
+            
+            for(int i = 0 ; i < seancesIDs.size(); i++){
+                
+                String date = "";
+                String heures_d = "";
+                String heures_f = "";
+                int semaine = -1;
+                int coursID = -1;
+                int typeID = -1;
+
+                ArrayList sallesIDs = new ArrayList();
+
+                ArrayList groupesIDs = new ArrayList();
+
+                ArrayList profsIDs = new ArrayList();
+                
+                myQuery = "Select * from seance where seance.ID = "+seancesIDs.get(i);
+                
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    semaine = rset.getInt("Semaine");
+                    date = rset.getString("Date");
+                    heures_d = rset.getString("Heure_Debut");
+                    heures_f = rset.getString("Heure_Fin");
+                    coursID = rset.getInt("ID_Cours");
+                    typeID = rset.getInt("ID_Type");
+                }
+                
+                myQuery = "Select * from seance_salles where seance_salles.ID_Seance = "+seancesIDs.get(i);
+                
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    sallesIDs.add(rset.getInt("ID_Salle"));
+                }
+                
+                myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Seance = "+seancesIDs.get(i);
+                
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    profsIDs.add(rset.getInt("ID_Enseignant"));
+                }
+                
+                myQuery = "Select * from seance_groupes where seance_groupes.ID_Seance = "+seancesIDs.get(i);
+                
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    groupesIDs.add(rset.getInt("ID_Groupe"));
+                }
+                
+                ArrayList groupes = new ArrayList();
+                
+                for(int j = 0 ; j < groupesIDs.size(); j++){
+
+                    myQuery = "Select * from groupe where groupe.ID = "+groupesIDs.get(j);
+
+                    rset = stmt.executeQuery(myQuery);
+
+                    while(rset.next())
+                    {
+                        groupes.add(rset.getString("Nom"));
+                    }
+
+                }
+            
+                String cours = "";
+
+                myQuery = "Select * from cours where cours.ID = "+coursID;
+
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    cours = rset.getString("Nom");
+                }
+
+                String type = "";
+
+                myQuery = "Select * from type_cours where type_cours.ID = "+typeID;
+
+                rset = stmt.executeQuery(myQuery);
+
+                while(rset.next())
+                {
+                    type = rset.getString("Nom");
+                }
+
+                ArrayList salles = new ArrayList();
+                ArrayList siteIDs = new ArrayList();
+
+                for(int j = 0 ; j < sallesIDs.size(); j++){
+
+                    myQuery = "Select * from salle where salle.ID = "+sallesIDs.get(j);
+
+                    rset = stmt.executeQuery(myQuery);
+
+                    while(rset.next())
+                    {
+                        salles.add(rset.getString("Nom"));
+                        siteIDs.add(rset.getInt("ID_Site"));
+                    }
+
+                }
+
+                ArrayList sites = new ArrayList();
+
+                for(int j = 0 ; j < siteIDs.size(); j++){
+
+                    myQuery = "Select * from site where site.ID = "+siteIDs.get(j);
+
+                    rset = stmt.executeQuery(myQuery);
+
+                    while(rset.next())
+                    {
+                        sites.add(rset.getString("Nom"));
+                    }
+
+                }
+                
+                ArrayList profs = new ArrayList();
+                
+                for(int j = 0 ; j < profsIDs.size(); j++){
+
+                    myQuery = "Select * from utilisateur where utilisateur.ID = "+profsIDs.get(j);
+
+                    rset = stmt.executeQuery(myQuery);
+
+                    while(rset.next())
+                    {
+                        profs.add(rset.getString("Nom"));
+                    }
+
+                }
+                
+                int jour;
+                
+                Calendar cl = new GregorianCalendar();
+                
+                String mots[] = date.split("-");
+                
+                cl.set(Integer.parseInt(mots[0]), Integer.parseInt(mots[1])-1, Integer.parseInt(mots[2]));
+                
+                jour = cl.get(Calendar.DAY_OF_WEEK);
+                
+                int h_d = -1, h_f = -1;
+                
+                switch (heures_d) {
+                    case "08:30:00":
+                        h_d = 1;
+                        break;
+                    case "10:15:00":
+                        h_d = 2;
+                        break;
+                    case "12:00:00":
+                        h_d = 3;
+                        break;
+                    case "13:45:00":
+                        h_d = 4;
+                        break;
+                    case "15:30:00":
+                        h_d = 5;
+                        break;
+                    case "17:15:00":
+                        h_d = 6;
+                        break;
+                    default:
+                        h_d = 7;
+                        break;
+                }
+                
+                switch (heures_f) {
+                    case "10:00:00":
+                        h_f = 1;
+                        break;
+                    case "11:45:00":
+                        h_f = 2;
+                        break;
+                    case "13:30:00":
+                        h_f = 3;
+                        break;
+                    case "15:15:00":
+                        h_f = 4;
+                        break;
+                    case "17:00:00":
+                        h_f = 5;
+                        break;
+                    case "18:45:00":
+                        h_f = 6;
+                        break;
+                    default:
+                        h_f = 7;
+                        break;
+                }
+                
+                allCartes.add(new Carte(cours, type, profs, salles, groupes, sites, semaine, jour, h_d, h_f, coursID));
+                
+            }  
+            
+        }
+        
+        return allCartes;
+        
+    }
+    
+    public String searchEmail(String searchString) throws SQLException{
+        
+        String returnString = "";
+        
+        String myQuery = ("Select * from utilisateur where utilisateur.Nom like '"+searchString+"'");
+        
+        rset = stmt.executeQuery(myQuery);
+        
+        while(rset.next())
+        {
+            returnString = rset.getString("Email");
+        }
+        
+        return returnString;
     }
     
 }

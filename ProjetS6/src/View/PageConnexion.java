@@ -35,6 +35,7 @@ public class PageConnexion extends javax.swing.JFrame {
                 System.exit(0); // tout fermer												System.exit(0); // tout fermer
             }
         });
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -137,7 +138,11 @@ public class PageConnexion extends javax.swing.JFrame {
                 case 1:
                     //fermer la page + ouvrir la suivante
                     setVisible(false);
-                    new PageEdt(jTextField1.getText());//jTextField1.getText());
+                    try {
+                        new PageEdt(jTextField1.getText());//jTextField1.getText());
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(PageConnexion.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     break;
                 case 2:
                     //mauvais login

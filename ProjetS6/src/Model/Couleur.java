@@ -19,11 +19,11 @@ public class Couleur {
         
         couleurs = new ArrayList<>();
         
-        couleurs.add("#87CEEB");
+        couleurs.add("#DFF2FF");
         couleurs.add("#B0F2B6");
-        couleurs.add("#BEF574");
+        couleurs.add("#98FB98");
         couleurs.add("#FF5E4D");
-        couleurs.add("#DDA0DD");
+        couleurs.add("#FDBFB7");
         couleurs.add("#E6E6FA");
     }
     
