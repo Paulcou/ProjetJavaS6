@@ -29,9 +29,7 @@ public class PageEdt extends javax.swing.JFrame {
     private Connexion myConnexion;
     private JPanel container, weekContainer;
     private String emailUser, searchString;
-    private JLabel h2,h3,h4,h5,h6,h7,h8,j1,j2,j3,j4,j5,j6,tmp,t;
-    private JButton b1;
-    private ResultSet rset;
+    private JLabel h2,h3,h4,h5,h6,h7,h8,j1,j2,j3,j4,j5,j6,tmp;
     private GridBagConstraints c;
     private boolean display;
     private ArrayList<Carte> allCartes;
@@ -50,7 +48,35 @@ public class PageEdt extends javax.swing.JFrame {
         c = new GridBagConstraints();
         
         display = true;
+
+        this.setTitle("Emploi du temps");
+        this.setSize(1315, 680);
+        this.setResizable(true);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
         
+        afficherMenuBar();
+          
+        container.setLayout(new GridBagLayout());
+        
+        weekContainer.setLayout(new GridBagLayout());
+        
+        afficherSemaines();
+        
+        afficherTitresEdt();
+        
+        allCartes = myConnexion.allSeances(emailUser);
+        
+        afficherCours();
+        
+        afficherComplement();
+        
+        this.getContentPane().add(container,"North");
+        this.getContentPane().add(weekContainer, "South");
+        this.setVisible(true);
+    }
+    
+    private void afficherMenuBar(){
         
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         
@@ -64,12 +90,6 @@ public class PageEdt extends javax.swing.JFrame {
 
         weekInt = cl.get(Calendar.WEEK_OF_YEAR);
         
-        this.setTitle("Emploi du temps");
-        this.setSize(1315, 680);
-        this.setResizable(true);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLocationRelativeTo(null);
-        
         JMenuBar bar = new JMenuBar();
         
         JMenu edt = new JMenu("Affichage");
@@ -77,20 +97,14 @@ public class PageEdt extends javax.swing.JFrame {
         JMenuItem classique = new JMenuItem("Classique");
         JMenuItem grille = new JMenuItem("Grille");
         
-        classique.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                display = true;
-                clsBtnActionPerformed(evt);
-            }
+        classique.addActionListener((java.awt.event.ActionEvent evt) -> {
+            display = true;
+            clsBtnActionPerformed(evt);
         });
         
-        grille.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                display = false;
-                griBtnActionPerformed(evt);
-            }
+        grille.addActionListener((java.awt.event.ActionEvent evt) -> {
+            display = false;
+            griBtnActionPerformed(evt);
         });
         
         edt.add(classique);
@@ -119,15 +133,12 @@ public class PageEdt extends javax.swing.JFrame {
         search.setMaximumSize(search.getPreferredSize());
         JButton sBtn = new JButton("Rechercher");
         
-        sBtn.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                searchString = search.getText();
-                try {
-                    sBtnActionPerformed(evt);
-                } catch (SQLException ex) {
-                    Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        sBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
+            searchString = search.getText();
+            try {
+                sBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
             
@@ -143,31 +154,19 @@ public class PageEdt extends javax.swing.JFrame {
         JButton addBtn = new JButton("Ajouter une séance");
         bar.add(addBtn);
         
+        addBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
+            try {
+                new PageAjouterSeance();
+            } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
         bar.add(spaceBetween6);
         bar.add(new JLabel("Semaine "+weekInt));
         
         this.setJMenuBar(bar);
-        
-        container.setLayout(new GridBagLayout());
-        
-        weekContainer.setLayout(new GridBagLayout());
-        
-        afficherSemaines();
-        
-        afficherTitresEdt();
-        
-        allCartes = myConnexion.allSeances(emailUser);
-        
-        afficherCours();
-        
-        afficherComplement();
-        
-        this.getContentPane().add(container,"North");
-        this.getContentPane().add(weekContainer, "South");
-        
-        this.setVisible(true);
     }
-    
     
     private void sBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException {
         
@@ -196,7 +195,7 @@ public class PageEdt extends javax.swing.JFrame {
         switchAffichage();
     }
     
-    public void afficherTitresEdt(){
+    private void afficherTitresEdt(){
         
         /*c.gridx = 1;
         c.gridy = 0;
@@ -358,7 +357,7 @@ public class PageEdt extends javax.swing.JFrame {
         container.add(h8, c);
     }
     
-    public void afficherCours(){
+    private void afficherCours(){
         
         int nbrDisplay = 0;
         Couleur color = new Couleur();
@@ -537,7 +536,7 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
-    public void afficherComplement(){
+    private void afficherComplement(){
         for(int i=2;i<15;i++){
             for(int j=1;j<7;j++){
                 c.gridx = j;
@@ -574,7 +573,7 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
-    public void switchAffichage(){
+    private void switchAffichage(){
         
         container.removeAll();
         
@@ -592,7 +591,7 @@ public class PageEdt extends javax.swing.JFrame {
         
     }
     
-    public void afficherCoursLigne(){
+    private void afficherCoursLigne(){
         Couleur color = new Couleur();
         ArrayList<String> jours;
         jours = new ArrayList<>();
@@ -629,7 +628,7 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
-    public void afficherSemaines(){
+    private void afficherSemaines(){
         int x = 0;
         for(int i=1;i<53;i++){
             

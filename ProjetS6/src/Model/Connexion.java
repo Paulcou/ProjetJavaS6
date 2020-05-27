@@ -14,7 +14,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import javax.swing.JComboBox;
 
 
 /**
@@ -430,6 +432,63 @@ public class Connexion {
         }
         
         return returnString;
+    }
+    
+    public void ajouterSeance(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles){
+        //System.out.println("Date : "+date);
+        //System.out.println("Heure_D : "+heure_d);
+        
+        
+        
+    }
+    
+    public boolean checkPourAjout(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles) throws SQLException{
+        
+        date = date.replace('/', '-');
+        
+        heure_d = heure_d + ":00";
+        
+        heure_f = heure_f + ":00";
+        
+        String myQuery = ("Select * from seance where seance.Date = '"+date+"'"); //AND (seance.Heure_Debut = '"+heure_d+"' OR seance.Heure_Fin = '"+heure_f+"')");
+        
+        int hd = Character.getNumericValue(heure_d.charAt(0))*10+Character.getNumericValue(heure_d.charAt(1));
+        int hf = Character.getNumericValue(heure_f.charAt(0))*10+Character.getNumericValue(heure_f.charAt(1));
+        
+        rset = stmt.executeQuery(myQuery);
+                   
+        boolean next = rset.next();
+        
+        // pas de séance le jour choisi
+        if(!next){
+            return true;
+        }
+        
+        
+        int hdr;
+        int hfr;
+        
+        ArrayList allId;
+        allId = new ArrayList<>();
+        
+        while(next)
+        {
+            hdr = Character.getNumericValue(rset.getString("Heure_Debut").charAt(0))*10 + Character.getNumericValue(rset.getString("Heure_Debut").charAt(1));
+            hfr = Character.getNumericValue(rset.getString("Heure_Fin").charAt(0))*10 + Character.getNumericValue(rset.getString("Heure_Fin").charAt(1));
+            
+            if((hd==hdr || hf==hfr)||(hd<hdr && hf>hdr)||(hd<hfr && hf>hfr)||(hd<hdr && hf>hfr)){
+                allId.add(rset.getInt("ID"));
+            }
+            
+            next = rset.next();
+        }
+        
+        if(allId.size()==0){
+            return true;
+        }
+        
+        
+        return true;
     }
     
 }
