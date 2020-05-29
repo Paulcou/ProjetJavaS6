@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class Carte {
     private String cours, type;
     private ArrayList profs, salles, groupes, sites;
-    private int semaine, jour, heure_d, heure_f, coursID;
+    private int semaine, jour, heure_d, heure_f, coursID, seanceID;
     
     public Carte(){
         cours = "";
@@ -25,9 +25,10 @@ public class Carte {
         jour = -1;
         heure_d = -1;
         heure_f = -1;
+        seanceID = -1;
     }
     
-    public Carte(String r_cours, String r_type, ArrayList r_profs, ArrayList r_salles, ArrayList r_groupes, ArrayList r_sites, int r_semaine, int r_jours, int r_debut, int r_fin, int r_coursID){
+    public Carte(String r_cours, String r_type, ArrayList r_profs, ArrayList r_salles, ArrayList r_groupes, ArrayList r_sites, int r_semaine, int r_jours, int r_debut, int r_fin, int r_coursID, int r_seanceID){
         cours = r_cours;
         type = r_type;
         sites = new ArrayList(r_sites);
@@ -39,6 +40,7 @@ public class Carte {
         heure_d = r_debut;
         heure_f = r_fin;
         coursID = r_coursID;
+        seanceID = r_seanceID;
     }
     
     public void setCours(String c){
@@ -117,4 +119,8 @@ public class Carte {
     public int getCoursID(){
         return coursID;
     }
+    public int getSeanceID(){
+        return seanceID;
+    }
+    
 }

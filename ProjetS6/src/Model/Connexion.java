@@ -8,13 +8,13 @@ package Model;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.swing.JComboBox;
 
@@ -67,7 +67,6 @@ public class Connexion {
         catch(ClassNotFoundException e){
         
         }
-        
       
         // url de connexion "jdbc:mysql://localhost:3305/usernameECE"
         String urlDatabase = "";
@@ -151,6 +150,23 @@ public class Connexion {
             //System.out.println("non pwd");
             return 3;
         }
+    }
+    
+    public int getDroit(String email) throws SQLException{
+        
+        String myQuery;
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+email+"'";
+        
+        int droit = 0;
+        
+        rset = stmt.executeQuery(myQuery);
+        
+        while(rset.next())
+        {
+            droit = rset.getInt("Droit");
+        }
+        
+        return droit;
     }
     
     /**
@@ -408,8 +424,7 @@ public class Connexion {
                         break;
                 }
                 
-                allCartes.add(new Carte(cours, type, profs, salles, groupes, sites, semaine, jour, h_d, h_f, coursID));
-                
+                allCartes.add(new Carte(cours, type, profs, salles, groupes, sites, semaine, jour, h_d, h_f, coursID, (int) seancesIDs.get(i)));  
             }  
             
         }
@@ -434,21 +449,231 @@ public class Connexion {
         return returnString;
     }
     
-    public void ajouterSeance(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles){
-        //System.out.println("Date : "+date);
-        //System.out.println("Heure_D : "+heure_d);
+    /**
+     *
+     * @param date
+     * @param heure_d
+     * @param heure_f
+     * @param Etat
+     * @param cours
+     * @param type
+     * @param allGroupes
+     * @param allProfs
+     * @param allSalles
+     * @throws java.sql.SQLException
+     */
+    public void ajouterSeance(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList allGroupes, ArrayList allProfs, ArrayList allSalles) throws SQLException{
         
+        int semaine;
+                
+        Calendar cl = new GregorianCalendar();
+
+        String mots[] = date.split("-");
+
+        cl.set(Integer.parseInt(mots[0]), Integer.parseInt(mots[1])-1, Integer.parseInt(mots[2]));
+
+        semaine = cl.get(Calendar.WEEK_OF_YEAR);
         
+        int id_cours;
         
+        if("Physique".equals(cours)){
+            id_cours = 2;
+        }else if("Informatique".equals(cours)){
+            id_cours = 3;
+        }else if("Electronique".equals(cours)){
+            id_cours = 4;
+        }else if("Anglais".equals(cours)){
+            id_cours = 5;
+        }else if("Finance".equals(cours)){
+            id_cours = 6;
+        }else{
+            id_cours = 1;
+        }
+        
+        int id_type;
+        
+        if("TD".equals(type)){
+            id_type = 1;
+        }else if("TP".equals(type)){
+            id_type = 2;
+        }else if("Cours Magistral".equals(type)){
+            id_type = 3;
+        }else if("Projet".equals(type)){
+            id_type = 4;
+        }else{
+            id_type = 5;
+        }
+        
+        int etat;
+        
+        if("Confirmé".equals(Etat)){
+            etat = 0;
+        }else if("En attente".equals(Etat)){
+            etat = 1;
+        }else{
+            etat = 2;
+        }
+        
+        int seanceId =0;
+        
+        PreparedStatement ps=conn.prepareStatement("insert into seance (Semaine,Date,Heure_Debut,Heure_Fin,Etat,ID_Cours,ID_Type) values(?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
+        
+        ps.setString(1,Integer.toString(semaine));
+        
+        ps.setString(2,date);
+        
+        ps.setString(3,heure_d);
+        
+        ps.setString(4,heure_f);
+        
+        ps.setString(5,Integer.toString(etat));
+        
+        ps.setString(6,Integer.toString(id_cours));
+        
+        ps.setString(7,Integer.toString(id_type));
+        
+        ps.executeUpdate();
+        
+        ResultSet rs=ps.getGeneratedKeys();
+        
+        if(rs.next()){
+            seanceId=rs.getInt(1);
+        }
+        
+        for(int i=0; i<allGroupes.size();i++){
+            
+            PreparedStatement ps2=conn.prepareStatement("insert into seance_groupes (ID_Seance,ID_Groupe) values('"+seanceId+"','"+allGroupes.get(i)+"')");
+            
+            ps2.executeUpdate();
+            
+        }
+        
+        for(int i=0; i<allProfs.size();i++){
+            
+            PreparedStatement ps3=conn.prepareStatement("insert into seances_enseignants (ID_Seance,ID_Enseignant) values('"+seanceId+"','"+allProfs.get(i)+"')");
+            
+            ps3.executeUpdate();
+            
+        }
+        
+        for(int i=0; i<allSalles.size();i++){
+            
+            PreparedStatement ps4=conn.prepareStatement("insert into seance_salles (ID_Seance,ID_Salle) values('"+seanceId+"','"+allSalles.get(i)+"')");
+            
+            ps4.executeUpdate();
+            
+        }        
     }
     
-    public boolean checkPourAjout(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles) throws SQLException{
+    /**
+     *
+     * @param date
+     * @param heure_d
+     * @param heure_f
+     * @param Etat
+     * @param cours
+     * @param type
+     * @param allGroupes
+     * @param allProfs
+     * @param allSalles
+     * @throws SQLException
+     * @throws java.lang.ClassNotFoundException
+     */
+    public void checkPourAjout(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles) throws SQLException, ClassNotFoundException{
+        
+        AjoutException except;
+        
+        except = new AjoutException();
         
         date = date.replace('/', '-');
         
         heure_d = heure_d + ":00";
         
+        heure_d = heure_d.replace('h', ':');
+        
         heure_f = heure_f + ":00";
+        
+        heure_f = heure_f.replace('h', ':');
+        
+        Calendar cl = new GregorianCalendar();
+
+        String mots[] = date.split("-");
+
+        cl.set(Integer.parseInt(mots[0]), Integer.parseInt(mots[1])-1, Integer.parseInt(mots[2]));
+        
+        boolean finalInt = true;
+        
+        ArrayList allGroupesById;
+        allGroupesById = new ArrayList();
+        
+        for(int i=0; i<allGroupes.size();i++){
+            if("TD1 ING1".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(7);
+            }else if("TD2 ING1".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(8);
+            }else if("TD3 ING1".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(9);
+            }else if("TD1 ING2".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(4);
+            }else if("TD2 ING2".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(5);
+            }else if("TD3 ING2".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(6);
+            }else if("TD1 ING3".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(1);
+            }else if("TD2 ING3".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(2);
+            }else if("TD3 ING3".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(3);
+            }else if("TD1 ING4".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(10);
+            }else if("TD2 ING4".equals(allGroupes.get(i).getSelectedItem().toString())){
+                allGroupesById.add(11);
+            }else{
+                allGroupesById.add(12);
+            }
+        }
+        
+        ArrayList allProfsById;
+        allProfsById = new ArrayList();
+        
+        for(int i=0; i<allProfs.size();i++){
+            if("SARSESKY".equals(allProfs.get(i).getSelectedItem().toString())){
+                allProfsById.add(7);
+            }else if("PULICI".equals(allProfs.get(i).getSelectedItem().toString())){
+                allProfsById.add(8);
+            }else{
+                allProfsById.add(9);
+            }
+        }
+        
+        ArrayList allSallesById;
+        allSallesById = new ArrayList();
+        
+        for(int i=0; i<allSalles.size(); i++){
+            if("S1 - E1".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(1);
+            }else if("S2 - E1".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(2);
+            }else if("A1 - E1".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(3);
+            }else if("S3 - E2".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(4);
+            }else if("S4 - E2".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(5);
+            }else if("A2 - E3".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(6);
+            }else if("A3 - E3".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(7);
+            }else if("S5 - E4".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(8);
+            }else if("S6 - E4".equals(allSalles.get(i).getSelectedItem().toString())){
+                allSallesById.add(9);
+            }else{
+                allSallesById.add(10);
+            }
+            
+        }
         
         String myQuery = ("Select * from seance where seance.Date = '"+date+"'"); //AND (seance.Heure_Debut = '"+heure_d+"' OR seance.Heure_Fin = '"+heure_f+"')");
         
@@ -457,21 +682,13 @@ public class Connexion {
         
         rset = stmt.executeQuery(myQuery);
                    
-        boolean next = rset.next();
-        
-        // pas de séance le jour choisi
-        if(!next){
-            return true;
-        }
-        
-        
         int hdr;
         int hfr;
         
         ArrayList allId;
         allId = new ArrayList<>();
         
-        while(next)
+        while(rset.next())
         {
             hdr = Character.getNumericValue(rset.getString("Heure_Debut").charAt(0))*10 + Character.getNumericValue(rset.getString("Heure_Debut").charAt(1));
             hfr = Character.getNumericValue(rset.getString("Heure_Fin").charAt(0))*10 + Character.getNumericValue(rset.getString("Heure_Fin").charAt(1));
@@ -479,16 +696,161 @@ public class Connexion {
             if((hd==hdr || hf==hfr)||(hd<hdr && hf>hdr)||(hd<hfr && hf>hfr)||(hd<hdr && hf>hfr)){
                 allId.add(rset.getInt("ID"));
             }
+        }
+        
+        ArrayList allGroupesId;
+        allGroupesId = new ArrayList();
+        
+        ArrayList allProfsId;
+        allProfsId = new ArrayList();
+        
+        ArrayList allSallesId;
+        allSallesId = new ArrayList();
+        
+        for(int i=0; i<allId.size(); i++){
             
-            next = rset.next();
+            myQuery = ("Select * from seance_groupes where seance_groupes.ID_Seance = '"+allId.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            int idGtmp;
+            
+            while(rset.next()){
+                
+                idGtmp = rset.getInt("ID_Groupe");
+                
+                if(allGroupesById.contains(idGtmp)){
+                    allGroupesId.add(idGtmp);
+                }
+            }
+            
+            myQuery = ("Select * from seances_enseignants where seances_enseignants.ID_Seance = '"+allId.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            int idPtmp;
+            
+            while(rset.next()){
+                
+                idPtmp = rset.getInt("ID_Enseignant");
+                
+                if(allProfsById.contains(idPtmp)){
+                    allProfsId.add(idPtmp);
+                }
+            }
+            
+            myQuery = ("Select * from seance_salles where seance_salles.ID_Seance = '"+allId.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            int idStmp;
+            
+            while(rset.next()){
+                
+                idStmp = rset.getInt("ID_Salle");
+                
+                if(allSallesById.contains(idStmp)){
+                    allSallesId.add(idStmp);
+                }
+            } 
         }
         
-        if(allId.size()==0){
-            return true;
+        if(cl.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+            except.dimanche();
+            finalInt = false;
         }
         
+        if(!allGroupesId.isEmpty()){
+            except.groupesNonLibres(allGroupesId);
+            finalInt = false;
+        }
         
-        return true;
+        if(!allProfsId.isEmpty()){
+            except.profsNonLibres(allProfsId);
+            finalInt = false;
+        }
+        
+        if(!allSallesId.isEmpty()){
+            except.sallesNonLibres(allSallesId);
+            finalInt = false;
+        }
+        
+        if(finalInt){
+            //call ajouter seance
+            ajouterSeance(date,heure_d,heure_f,Etat,cours,type,allGroupesById,allProfsById,allSallesById);
+        }
     }
     
+    public ArrayList groupesById(ArrayList ids) throws SQLException{
+        ArrayList names;
+        names = new ArrayList();
+        
+        for(int i=0; i<ids.size(); i++){
+            
+            String myQuery = ("Select * from groupe where groupe.ID = '"+ids.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            String send = "";
+            
+            while(rset.next()){
+                
+                send += rset.getString("Nom");
+                
+                send += " - ";
+                
+                send += "ING";
+                
+                send += rset.getInt("ID_Promotion");
+                
+                names.add(send);
+            } 
+        }
+        return names;
+    }
+    
+    public ArrayList profsById(ArrayList ids) throws SQLException{
+        ArrayList names;
+        names = new ArrayList();
+        
+        for(int i=0; i<ids.size(); i++){
+            
+            String myQuery = ("Select * from utilisateur where utilisateur.ID = '"+ids.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            while(rset.next()){
+                names.add(rset.getString("Nom"));
+            } 
+        }
+        return names;
+    }
+    
+    public ArrayList sallesById(ArrayList ids) throws SQLException{
+        ArrayList names;
+        names = new ArrayList();
+        
+        for(int i=0; i<ids.size(); i++){
+            
+            String myQuery = ("Select * from salle where salle.ID = '"+ids.get(i)+"'");
+            
+            rset = stmt.executeQuery(myQuery);
+            
+            String send = "";
+            
+            while(rset.next()){
+                
+                send += rset.getString("Nom");
+                
+                send += " - ";
+                
+                send += "E";
+                
+                send += rset.getInt("ID_Site");
+                
+                names.add(send);
+            } 
+        }
+        return names;
+    }
 }

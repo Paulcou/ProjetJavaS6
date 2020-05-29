@@ -33,7 +33,7 @@ public class PageEdt extends javax.swing.JFrame {
     private GridBagConstraints c;
     private boolean display;
     private ArrayList<Carte> allCartes;
-    private int weekInt;
+    private int weekInt,droit;
     
     public PageEdt(String email) throws SQLException, ClassNotFoundException{
         
@@ -41,6 +41,8 @@ public class PageEdt extends javax.swing.JFrame {
         
         myConnexion = new Connexion("edt", "root", "");
         
+        droit = myConnexion.getDroit(emailUser);
+
         container = new JPanel();
         
         weekContainer = new JPanel();
@@ -129,40 +131,46 @@ public class PageEdt extends javax.swing.JFrame {
         
         bar.add(spaceBetween2);
         
-        JTextField search = new JTextField(20);
-        search.setMaximumSize(search.getPreferredSize());
-        JButton sBtn = new JButton("Rechercher");
-        
-        sBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
-            searchString = search.getText();
-            try {
-                sBtnActionPerformed(evt);
-            } catch (SQLException ex) {
-                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-            
-        bar.add(search);
-        bar.add(spaceBetween3);
-        bar.add(sBtn);
-        bar.add(spaceBetween4);
-        
+        if(droit == 1 || droit == 2){
+            JTextField search = new JTextField(20);
+            search.setMaximumSize(search.getPreferredSize());
+            JButton sBtn = new JButton("Rechercher");
+
+            sBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
+                searchString = search.getText();
+                try {
+                    sBtnActionPerformed(evt);
+                } catch (SQLException ex) {
+                    Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+
+            bar.add(search);
+            bar.add(spaceBetween3);
+            bar.add(sBtn);
+            bar.add(spaceBetween4);
+        }
+
         JButton statBtn = new JButton("Statistiques");
         bar.add(statBtn);
         bar.add(spaceBetween5);
         
-        JButton addBtn = new JButton("Ajouter une séance");
-        bar.add(addBtn);
+        if(droit == 1){
+            JButton addBtn = new JButton("Ajouter une séance");
+            bar.add(addBtn);
+
+            addBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
+                try {
+                    new PageAjouterSeance();
+                } catch (SQLException | ClassNotFoundException ex) {
+                    Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
         
-        addBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
-            try {
-                new PageAjouterSeance();
-            } catch (SQLException | ClassNotFoundException ex) {
-                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+            bar.add(spaceBetween6);
+        }
         
-        bar.add(spaceBetween6);
+        
         bar.add(new JLabel("Semaine "+weekInt));
         
         this.setJMenuBar(bar);
@@ -170,7 +178,7 @@ public class PageEdt extends javax.swing.JFrame {
     
     private void sBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException {
         
-        // On va chercher l'email de la personne rechercher.
+        // On va chercher l'email de la personne recherchée.
         
         String newLogin = myConnexion.searchEmail(searchString);
        
