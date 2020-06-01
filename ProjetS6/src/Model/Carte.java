@@ -5,14 +5,15 @@
  */
 package Model;
 import java.util.ArrayList;
+import java.util.Comparator;
 /**
  *
  * @author jules
  */
 public class Carte {
-    private String cours, type;
+    private String cours, type, date;
     private ArrayList profs, salles, groupes, sites;
-    private int semaine, jour, heure_d, heure_f, coursID, seanceID;
+    private int semaine, jour, heure_d, heure_f, coursID, seanceID, etat;
     
     public Carte(){
         cours = "";
@@ -28,7 +29,7 @@ public class Carte {
         seanceID = -1;
     }
     
-    public Carte(String r_cours, String r_type, ArrayList r_profs, ArrayList r_salles, ArrayList r_groupes, ArrayList r_sites, int r_semaine, int r_jours, int r_debut, int r_fin, int r_coursID, int r_seanceID){
+    public Carte(String r_cours, String r_type, ArrayList r_profs, ArrayList r_salles, ArrayList r_groupes, ArrayList r_sites, int r_semaine, int r_jours, int r_debut, int r_fin, int r_coursID, int r_seanceID, String r_date, int r_etat){
         cours = r_cours;
         type = r_type;
         sites = new ArrayList(r_sites);
@@ -41,6 +42,8 @@ public class Carte {
         heure_f = r_fin;
         coursID = r_coursID;
         seanceID = r_seanceID;
+        date = r_date;
+        etat = r_etat;
     }
     
     public void setCours(String c){
@@ -80,6 +83,9 @@ public class Carte {
         }
         return finalString;
     }
+    public ArrayList getSites(){
+        return sites;
+    }
     public String getSalle(){
         String finalString = "";
         for(int i=0; i<salles.size(); i++){
@@ -87,6 +93,9 @@ public class Carte {
             finalString += " ";
         }
         return finalString;
+    }
+    public ArrayList getSalles(){
+        return salles;
     }
     public String getProf(){
         String finalString = "";
@@ -96,6 +105,9 @@ public class Carte {
         }
         return finalString;
     }
+    public ArrayList getProfs(){
+        return profs;
+    }
     public String getGroupe(){
         String finalString = "";
         for(int i=0; i<groupes.size(); i++){
@@ -103,6 +115,9 @@ public class Carte {
             finalString += " ";
         }
         return finalString;
+    }
+    public ArrayList getGroupes(){
+        return groupes;
     }
     public int getSemaine(){
         return semaine;
@@ -121,6 +136,23 @@ public class Carte {
     }
     public int getSeanceID(){
         return seanceID;
+    } 
+    public String getDate(){
+        return date;
     }
-    
+    public int getEtat(){
+        return etat;
+    }
+
+    public static Comparator<Carte> carteComparator = (Carte s1, Carte s2) -> {
+        if(s1.getSemaine()==s2.getSemaine()){
+            if(s1.getJour()==s2.getJour()){
+                return s1.getHeureD()-s2.getHeureD();
+            }else{
+                return s1.getJour() - s2.getJour();
+            }
+        }else{
+            return s1.getSemaine() - s2.getSemaine();
+        }
+    };
 }

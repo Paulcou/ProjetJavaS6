@@ -11,9 +11,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,16 +30,20 @@ public class PageEdt extends javax.swing.JFrame {
     
     private Connexion myConnexion;
     private JPanel container, weekContainer;
-    private String emailUser, searchString;
+    private String emailUser, searchString, newLogin;
     private JLabel h2,h3,h4,h5,h6,h7,h8,j1,j2,j3,j4,j5,j6,tmp;
     private GridBagConstraints c;
     private boolean display;
     private ArrayList<Carte> allCartes;
     private int weekInt,droit;
+    private Insets ins;
+    
     
     public PageEdt(String email) throws SQLException, ClassNotFoundException{
         
         emailUser = email;
+        
+        newLogin = email;
         
         myConnexion = new Connexion("edt", "root", "");
         
@@ -50,6 +56,8 @@ public class PageEdt extends javax.swing.JFrame {
         c = new GridBagConstraints();
         
         display = true;
+        
+        ins = new Insets(1, 1, 1, 1);
 
         this.setTitle("Emploi du temps");
         this.setSize(1315, 680);
@@ -68,6 +76,8 @@ public class PageEdt extends javax.swing.JFrame {
         afficherTitresEdt();
         
         allCartes = myConnexion.allSeances(emailUser);
+        
+        Collections.sort(allCartes,Carte.carteComparator);
         
         afficherCours();
         
@@ -96,8 +106,8 @@ public class PageEdt extends javax.swing.JFrame {
         
         JMenu edt = new JMenu("Affichage");
         
-        JMenuItem classique = new JMenuItem("Classique");
-        JMenuItem grille = new JMenuItem("Grille");
+        JMenuItem classique = new JMenuItem("Grille");
+        JMenuItem grille = new JMenuItem("Ligne");
         
         classique.addActionListener((java.awt.event.ActionEvent evt) -> {
             display = true;
@@ -124,6 +134,8 @@ public class PageEdt extends javax.swing.JFrame {
         spaceBetween5.setEnabled(false);
         JMenu spaceBetween6 = new JMenu("   ");
         spaceBetween6.setEnabled(false);
+        JMenu spaceBetween7 = new JMenu("   ");
+        spaceBetween7.setEnabled(false);
         
         bar.add(spaceBetween);
         
@@ -161,7 +173,8 @@ public class PageEdt extends javax.swing.JFrame {
 
             addBtn.addActionListener((java.awt.event.ActionEvent evt) -> {
                 try {
-                    new PageAjouterSeance();
+                    this.setVisible(false);
+                    new PageAjouterSeance(newLogin);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -173,6 +186,9 @@ public class PageEdt extends javax.swing.JFrame {
         
         bar.add(new JLabel("Semaine "+weekInt));
         
+        bar.add(spaceBetween7);
+        bar.add(new JLabel(emailUser));
+        
         this.setJMenuBar(bar);
     }
     
@@ -180,7 +196,7 @@ public class PageEdt extends javax.swing.JFrame {
         
         // On va chercher l'email de la personne recherchée.
         
-        String newLogin = myConnexion.searchEmail(searchString);
+        newLogin = myConnexion.searchEmail(searchString);
        
         if(!"".equals(newLogin)){
             container.removeAll();
@@ -204,11 +220,6 @@ public class PageEdt extends javax.swing.JFrame {
     }
     
     private void afficherTitresEdt(){
-        
-        /*c.gridx = 1;
-        c.gridy = 0;
-        c.weightx = 0.5;
-        container.add(new JLabel(emailUser), c);*/
         
         j1 = new JLabel("<html><div style='padding:2px;background-color:#EEEEEE;border-left:2px solid black; border-top:2px solid black; height:40px; width:206;'>"
                 + "<p></>"
@@ -379,7 +390,7 @@ public class PageEdt extends javax.swing.JFrame {
                     c.weightx = 0.5;
                     container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:159px;border-left:2px solid black;border-top:2px solid black;border-bottom:2px solid black;'>"
                                     + "<p style='text-align:center'>"+allCartes.get(i).getCours()+" - "+allCartes.get(i).getType()+"</p>"
-                                    + "<p style='text-align:center'>"+allCartes.get(i).getSite()+" - "+allCartes.get(i).getSalle()+"</p>"
+                                    + "<p style='text-align:center'>"+allCartes.get(i).getSalle()+"</p>"
                                     + "<p style='text-align:center'>"+allCartes.get(i).getProf()+" - "+allCartes.get(i).getGroupe()+"</p>"
                                     + "</div></html>"), c);
                 }else{
@@ -392,7 +403,7 @@ public class PageEdt extends javax.swing.JFrame {
                                 c.weightx = 0.5;
                                 container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:159px;border:2px solid "+color.getCouleurs(allCartes.get(i).getCoursID())+";border-left:2px solid black;'>"
                                                 + "<p style='text-align:center'>"+allCartes.get(i).getCours()+" - "+allCartes.get(i).getType()+"</p>"
-                                                + "<p style='text-align:center'>"+allCartes.get(i).getSite()+" - "+allCartes.get(i).getSalle()+"</p>"
+                                                + "<p style='text-align:center'>"+allCartes.get(i).getSalle()+"</p>"
                                                 + "<p style='text-align:center'>"+allCartes.get(i).getProf()+" - "+allCartes.get(i).getGroupe()+"</p>"
                                                 + "</div></html>"), c);
                                 
@@ -469,7 +480,7 @@ public class PageEdt extends javax.swing.JFrame {
                                 c.gridy = allCartes.get(i).getHeureD()*2+nbrDisplay;
                                 c.weightx = 0.5;
                                 container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:159px;border-left:2px solid black;'>"                                               
-                                                + "<p style='text-align:center'>"+allCartes.get(i).getSite()+" - "+allCartes.get(i).getSalle()+"</p>"                                               
+                                                + "<p style='text-align:center'>"+allCartes.get(i).getSalle()+"</p>"                                               
                                                 + "</div></html>"), c);
                                 
                             }else if(j==(2*allCartes.get(i).getHeureF()- 2*allCartes.get(i).getHeureD())/2 +2){
@@ -610,28 +621,80 @@ public class PageEdt extends javax.swing.JFrame {
         jours.add("Vendredi");
         jours.add("Samedi");
         
+        ArrayList<String> heureD;
+        heureD = new ArrayList<>();
+        heureD.add("8h30");
+        heureD.add("10h15");
+        heureD.add("12h00");
+        heureD.add("13h45");
+        heureD.add("15h30");
+        heureD.add("17h15");
+        heureD.add("19h00");
+        
+        ArrayList<String> heureF;
+        heureF = new ArrayList<>();
+        heureF.add("10h00");
+        heureF.add("11h45");
+        heureF.add("13h30");
+        heureF.add("15h15");
+        heureF.add("17h00");
+        heureF.add("18h45");
+        heureF.add("20h30");
+        
+        JButton tmpButton, tmpInfo;
+        
         for(int i=0; i<allCartes.size();i++){
             if(allCartes.get(i).getSemaine()==weekInt){
+                //c.insets = ins;
                 c.gridx = 0;
                 c.gridy = i;
 
-                if(i==allCartes.size()-1){
-                    container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:400px;border:2px solid black;'>"
+                //if(i==allCartes.size()-1){
+                    container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:1px;width:800px;border:solid black;border-width:thin;'>"
                                         + "<p style='text-align:left'>Semaine "+allCartes.get(i).getSemaine()+" | "
-                                        +jours.get(allCartes.get(i).getJour()-1)+" | "
+                                        +jours.get(allCartes.get(i).getJour()-2)+" | "
+                                        +heureD.get(allCartes.get(i).getHeureD()-1)+" - "
+                                        +heureF.get(allCartes.get(i).getHeureF()-1)+" | "
                                         +allCartes.get(i).getCours()+" | "+allCartes.get(i).getType()
-                                        +" | "+allCartes.get(i).getSite()+" | "+allCartes.get(i).getSalle()
+                                        +" | "+allCartes.get(i).getSalle()
                                         +" | "+allCartes.get(i).getProf()+" | "+allCartes.get(i).getGroupe()+"</p>"
                                         + "</div></html>"), c);
-                }else{
-                    container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:400px;border-left:2px solid black;border-top:2px solid black;border-right:2px solid black;'>"
+                //}else{
+                    /*container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:800px;height:20px;border-left:2px solid black;border-top:2px solid black;border-right:2px solid black;'>"
                                         + "<p style='text-align:left'>Semaine "+allCartes.get(i).getSemaine()+" | "
-                                        +jours.get(allCartes.get(i).getJour()-1)+" | "
+                                        +jours.get(allCartes.get(i).getJour()-2)+" | "
+                                        +heureD.get(allCartes.get(i).getHeureD()-1)+" - "
+                                        +heureF.get(allCartes.get(i).getHeureF()-1)+" | "
                                         +allCartes.get(i).getCours()+" | "+allCartes.get(i).getType()
-                                        +" | "+allCartes.get(i).getSite()+" | "+allCartes.get(i).getSalle()
+                                        +" | "+allCartes.get(i).getSalle()
                                         +" | "+allCartes.get(i).getProf()+" | "+allCartes.get(i).getGroupe()+"</p>"
-                                        + "</div></html>"), c);
-                }
+                                        + "</div></html>"), c);*/
+                //}
+                //c.insets = ins;
+                c.gridx = 1;
+                c.gridy = i;
+                
+                tmpButton = new JButton("<html><p id="+allCartes.get(i).getSeanceID()+">Modifier</p></html>");
+                
+                tmpButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+                    String res = evt.toString();
+                    int start = res.indexOf("id")+3;
+                    int end = res.indexOf(">Modifier");
+                    String seanceID = "";
+                    for(int j=start;j<end;j++){
+                        seanceID+=res.charAt(j);
+                    }
+                    try {
+                        this.setVisible(false);
+                        new PageModifierSeance(Integer.parseInt(seanceID),newLogin);
+                    } catch (SQLException | ClassNotFoundException | ParseException ex) {
+                        Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                });
+                
+                container.add(tmpButton,c);
+                
             }
         }
     }

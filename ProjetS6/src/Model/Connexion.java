@@ -56,8 +56,6 @@ public class Connexion {
      * @throws java.lang.ClassNotFoundException
      */
     public Connexion(String nameDatabase, String loginDatabase, String passwordDatabase) throws SQLException, ClassNotFoundException{
-        
-         //System.out.println("passe");
          
         // chargement driver "com.mysql.jdbc.Driver"
         
@@ -68,7 +66,6 @@ public class Connexion {
         
         }
       
-        // url de connexion "jdbc:mysql://localhost:3305/usernameECE"
         String urlDatabase = "";
         try{
             urlDatabase = "jdbc:mysql://localhost:3306/" + nameDatabase;
@@ -76,7 +73,6 @@ public class Connexion {
         catch(Exception e){
             e.printStackTrace();
         }
-       // String urlDatabase = "jdbc:mysql://localhost:3308/jps?characterEncoding=latin1";
 
         //création d'une connexion JDBC à la base 
         conn = DriverManager.getConnection(urlDatabase, loginDatabase, passwordDatabase);
@@ -116,6 +112,13 @@ public class Connexion {
         conn.close();
     }
     
+    /**
+     *
+     * @param login
+     * @param pwd
+     * @return
+     * @throws SQLException
+     */
     public int checkLogin(String login, String pwd) throws SQLException{
         
         String myQuery;
@@ -152,6 +155,12 @@ public class Connexion {
         }
     }
     
+    /**
+     *
+     * @param email
+     * @return
+     * @throws SQLException
+     */
     public int getDroit(String email) throws SQLException{
         
         String myQuery;
@@ -198,6 +207,8 @@ public class Connexion {
             next = rset.next();
         }
         
+        ArrayList seancesIDs = new ArrayList();
+        
         if(droit==4){
             
             myQuery = "Select * from etudiant where etudiant.ID_Utilisateur = "+ID;
@@ -211,11 +222,7 @@ public class Connexion {
                 ID_Groupe = rset.getInt("ID_Groupe");
             }
             
-            //OKOKOKOKSystem.out.println("ID G: "+ID_Groupe);
-            
             myQuery = "Select * from seance_groupes where seance_groupes.ID_Groupe = "+ID_Groupe;
-            
-            ArrayList seancesIDs = new ArrayList();
 
             rset = stmt.executeQuery(myQuery);
 
@@ -224,215 +231,251 @@ public class Connexion {
                 seancesIDs.add(rset.getInt("ID_Seance"));
             }
             
-            for(int i = 0 ; i < seancesIDs.size(); i++){
-                
-                String date = "";
-                String heures_d = "";
-                String heures_f = "";
-                int semaine = -1;
-                int coursID = -1;
-                int typeID = -1;
+        }else if(droit==3){
+            myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Enseignant = "+ID;
 
-                ArrayList sallesIDs = new ArrayList();
+            rset = stmt.executeQuery(myQuery);
 
-                ArrayList groupesIDs = new ArrayList();
-
-                ArrayList profsIDs = new ArrayList();
-                
-                myQuery = "Select * from seance where seance.ID = "+seancesIDs.get(i);
-                
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    semaine = rset.getInt("Semaine");
-                    date = rset.getString("Date");
-                    heures_d = rset.getString("Heure_Debut");
-                    heures_f = rset.getString("Heure_Fin");
-                    coursID = rset.getInt("ID_Cours");
-                    typeID = rset.getInt("ID_Type");
-                }
-                
-                myQuery = "Select * from seance_salles where seance_salles.ID_Seance = "+seancesIDs.get(i);
-                
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    sallesIDs.add(rset.getInt("ID_Salle"));
-                }
-                
-                myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Seance = "+seancesIDs.get(i);
-                
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    profsIDs.add(rset.getInt("ID_Enseignant"));
-                }
-                
-                myQuery = "Select * from seance_groupes where seance_groupes.ID_Seance = "+seancesIDs.get(i);
-                
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    groupesIDs.add(rset.getInt("ID_Groupe"));
-                }
-                
-                ArrayList groupes = new ArrayList();
-                
-                for(int j = 0 ; j < groupesIDs.size(); j++){
-
-                    myQuery = "Select * from groupe where groupe.ID = "+groupesIDs.get(j);
-
-                    rset = stmt.executeQuery(myQuery);
-
-                    while(rset.next())
-                    {
-                        groupes.add(rset.getString("Nom"));
-                    }
-
-                }
-            
-                String cours = "";
-
-                myQuery = "Select * from cours where cours.ID = "+coursID;
-
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    cours = rset.getString("Nom");
-                }
-
-                String type = "";
-
-                myQuery = "Select * from type_cours where type_cours.ID = "+typeID;
-
-                rset = stmt.executeQuery(myQuery);
-
-                while(rset.next())
-                {
-                    type = rset.getString("Nom");
-                }
-
-                ArrayList salles = new ArrayList();
-                ArrayList siteIDs = new ArrayList();
-
-                for(int j = 0 ; j < sallesIDs.size(); j++){
-
-                    myQuery = "Select * from salle where salle.ID = "+sallesIDs.get(j);
-
-                    rset = stmt.executeQuery(myQuery);
-
-                    while(rset.next())
-                    {
-                        salles.add(rset.getString("Nom"));
-                        siteIDs.add(rset.getInt("ID_Site"));
-                    }
-
-                }
-
-                ArrayList sites = new ArrayList();
-
-                for(int j = 0 ; j < siteIDs.size(); j++){
-
-                    myQuery = "Select * from site where site.ID = "+siteIDs.get(j);
-
-                    rset = stmt.executeQuery(myQuery);
-
-                    while(rset.next())
-                    {
-                        sites.add(rset.getString("Nom"));
-                    }
-
-                }
-                
-                ArrayList profs = new ArrayList();
-                
-                for(int j = 0 ; j < profsIDs.size(); j++){
-
-                    myQuery = "Select * from utilisateur where utilisateur.ID = "+profsIDs.get(j);
-
-                    rset = stmt.executeQuery(myQuery);
-
-                    while(rset.next())
-                    {
-                        profs.add(rset.getString("Nom"));
-                    }
-
-                }
-                
-                int jour;
-                
-                Calendar cl = new GregorianCalendar();
-                
-                String mots[] = date.split("-");
-                
-                cl.set(Integer.parseInt(mots[0]), Integer.parseInt(mots[1])-1, Integer.parseInt(mots[2]));
-                
-                jour = cl.get(Calendar.DAY_OF_WEEK);
-                
-                int h_d = -1, h_f = -1;
-                
-                switch (heures_d) {
-                    case "08:30:00":
-                        h_d = 1;
-                        break;
-                    case "10:15:00":
-                        h_d = 2;
-                        break;
-                    case "12:00:00":
-                        h_d = 3;
-                        break;
-                    case "13:45:00":
-                        h_d = 4;
-                        break;
-                    case "15:30:00":
-                        h_d = 5;
-                        break;
-                    case "17:15:00":
-                        h_d = 6;
-                        break;
-                    default:
-                        h_d = 7;
-                        break;
-                }
-                
-                switch (heures_f) {
-                    case "10:00:00":
-                        h_f = 1;
-                        break;
-                    case "11:45:00":
-                        h_f = 2;
-                        break;
-                    case "13:30:00":
-                        h_f = 3;
-                        break;
-                    case "15:15:00":
-                        h_f = 4;
-                        break;
-                    case "17:00:00":
-                        h_f = 5;
-                        break;
-                    case "18:45:00":
-                        h_f = 6;
-                        break;
-                    default:
-                        h_f = 7;
-                        break;
-                }
-                
-                allCartes.add(new Carte(cours, type, profs, salles, groupes, sites, semaine, jour, h_d, h_f, coursID, (int) seancesIDs.get(i)));  
-            }  
-            
+            while(rset.next())
+            {
+                seancesIDs.add(rset.getInt("ID_Seance"));
+            }
         }
-        
+            
+        for(int i = 0 ; i < seancesIDs.size(); i++){
+            
+            allCartes.add(getSeanceById((int)seancesIDs.get(i)));
+            
+        }          
         return allCartes;
-        
     }
     
+    /**
+     *
+     * @param id
+     * @return
+     * @throws SQLException
+     */
+    public Carte getSeanceById(int id) throws SQLException{
+                
+        String date = "";
+        String heures_d = "";
+        String heures_f = "";
+        int semaine = -1;
+        int coursID = -1;
+        int typeID = -1;
+        int etat = -1;
+
+        ArrayList sallesIDs = new ArrayList();
+
+        ArrayList groupesIDs = new ArrayList();
+
+        ArrayList profsIDs = new ArrayList();
+
+        String myQuery = "Select * from seance where seance.ID = "+id;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            semaine = rset.getInt("Semaine");
+            date = rset.getString("Date");
+            heures_d = rset.getString("Heure_Debut");
+            heures_f = rset.getString("Heure_Fin");
+            etat = rset.getInt("Etat");
+            coursID = rset.getInt("ID_Cours");
+            typeID = rset.getInt("ID_Type");
+        }
+
+        myQuery = "Select * from seance_salles where seance_salles.ID_Seance = "+id;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            sallesIDs.add(rset.getInt("ID_Salle"));
+        }
+
+        myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Seance = "+id;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            profsIDs.add(rset.getInt("ID_Enseignant"));
+        }
+
+        myQuery = "Select * from seance_groupes where seance_groupes.ID_Seance = "+id;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            groupesIDs.add(rset.getInt("ID_Groupe"));
+        }
+
+        ArrayList groupes = new ArrayList();
+
+        for(int j = 0 ; j < groupesIDs.size(); j++){
+
+            myQuery = "Select * from groupe where groupe.ID = "+groupesIDs.get(j);
+
+            rset = stmt.executeQuery(myQuery);
+            
+            String name = "";
+
+            while(rset.next())
+            {
+                name += rset.getString("Nom");
+                name += " ING";
+                name += rset.getInt("ID_Promotion");
+            }
+            groupes.add(name);
+        }
+
+        String cours = "";
+
+        myQuery = "Select * from cours where cours.ID = "+coursID;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            cours = rset.getString("Nom");
+        }
+
+        String type = "";
+
+        myQuery = "Select * from type_cours where type_cours.ID = "+typeID;
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            type = rset.getString("Nom");
+        }
+
+        ArrayList salles = new ArrayList();
+        ArrayList siteIDs = new ArrayList();
+
+        for(int j = 0 ; j < sallesIDs.size(); j++){
+
+            myQuery = "Select * from salle where salle.ID = "+sallesIDs.get(j);
+
+            rset = stmt.executeQuery(myQuery);
+            
+            String name ="";
+            int siteId;
+            while(rset.next())
+            {
+                name += rset.getString("Nom");
+                name += " - E";
+                siteId = rset.getInt("ID_Site");
+                name += siteId;
+                siteIDs.add(siteId);
+            }
+            salles.add(name);
+        }
+
+        ArrayList sites = new ArrayList();
+
+        for(int j = 0 ; j < siteIDs.size(); j++){
+
+            myQuery = "Select * from site where site.ID = "+siteIDs.get(j);
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                sites.add(rset.getString("Nom"));
+            }
+
+        }
+
+        ArrayList profs = new ArrayList();
+
+        for(int j = 0 ; j < profsIDs.size(); j++){
+
+            myQuery = "Select * from utilisateur where utilisateur.ID = "+profsIDs.get(j);
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                profs.add(rset.getString("Nom"));
+            }
+
+        }
+
+        int jour;
+
+        Calendar cl = new GregorianCalendar();
+
+        String mots[] = date.split("-");
+
+        cl.set(Integer.parseInt(mots[0]), Integer.parseInt(mots[1])-1, Integer.parseInt(mots[2]));
+
+        jour = cl.get(Calendar.DAY_OF_WEEK);
+
+        int h_d = -1, h_f = -1;
+
+        switch (heures_d) {
+            case "08:30:00":
+                h_d = 1;
+                break;
+            case "10:15:00":
+                h_d = 2;
+                break;
+            case "12:00:00":
+                h_d = 3;
+                break;
+            case "13:45:00":
+                h_d = 4;
+                break;
+            case "15:30:00":
+                h_d = 5;
+                break;
+            case "17:15:00":
+                h_d = 6;
+                break;
+            default:
+                h_d = 7;
+                break;
+        }
+
+        switch (heures_f) {
+            case "10:00:00":
+                h_f = 1;
+                break;
+            case "11:45:00":
+                h_f = 2;
+                break;
+            case "13:30:00":
+                h_f = 3;
+                break;
+            case "15:15:00":
+                h_f = 4;
+                break;
+            case "17:00:00":
+                h_f = 5;
+                break;
+            case "18:45:00":
+                h_f = 6;
+                break;
+            default:
+                h_f = 7;
+                break;
+        }
+
+        return new Carte(cours, type, profs, salles, groupes, sites, semaine, jour, h_d, h_f, coursID, id,date,etat);
+    }
+    
+    /**
+     *
+     * @param searchString
+     * @return
+     * @throws SQLException
+     */
     public String searchEmail(String searchString) throws SQLException{
         
         String returnString = "";
@@ -576,10 +619,11 @@ public class Connexion {
      * @param allGroupes
      * @param allProfs
      * @param allSalles
+     * @param r_id
      * @throws SQLException
      * @throws java.lang.ClassNotFoundException
      */
-    public void checkPourAjout(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles) throws SQLException, ClassNotFoundException{
+    public boolean checkPourAjout(String date, String heure_d, String heure_f, String Etat, String cours, String type, ArrayList<JComboBox> allGroupes, ArrayList<JComboBox> allProfs, ArrayList<JComboBox> allSalles, int r_id) throws SQLException, ClassNotFoundException{
         
         AjoutException except;
         
@@ -709,50 +753,53 @@ public class Connexion {
         
         for(int i=0; i<allId.size(); i++){
             
-            myQuery = ("Select * from seance_groupes where seance_groupes.ID_Seance = '"+allId.get(i)+"'");
+            if((int)allId.get(i)!=r_id){
             
-            rset = stmt.executeQuery(myQuery);
-            
-            int idGtmp;
-            
-            while(rset.next()){
-                
-                idGtmp = rset.getInt("ID_Groupe");
-                
-                if(allGroupesById.contains(idGtmp)){
-                    allGroupesId.add(idGtmp);
+                myQuery = ("Select * from seance_groupes where seance_groupes.ID_Seance = '"+allId.get(i)+"'");
+
+                rset = stmt.executeQuery(myQuery);
+
+                int idGtmp;
+
+                while(rset.next()){
+
+                    idGtmp = rset.getInt("ID_Groupe");
+
+                    if(allGroupesById.contains(idGtmp)){
+                        allGroupesId.add(idGtmp);
+                    }
+                }
+
+                myQuery = ("Select * from seances_enseignants where seances_enseignants.ID_Seance = '"+allId.get(i)+"'");
+
+                rset = stmt.executeQuery(myQuery);
+
+                int idPtmp;
+
+                while(rset.next()){
+
+                    idPtmp = rset.getInt("ID_Enseignant");
+
+                    if(allProfsById.contains(idPtmp)){
+                        allProfsId.add(idPtmp);
+                    }
+                }
+
+                myQuery = ("Select * from seance_salles where seance_salles.ID_Seance = '"+allId.get(i)+"'");
+
+                rset = stmt.executeQuery(myQuery);
+
+                int idStmp;
+
+                while(rset.next()){
+
+                    idStmp = rset.getInt("ID_Salle");
+
+                    if(allSallesById.contains(idStmp)){
+                        allSallesId.add(idStmp);
+                    }
                 }
             }
-            
-            myQuery = ("Select * from seances_enseignants where seances_enseignants.ID_Seance = '"+allId.get(i)+"'");
-            
-            rset = stmt.executeQuery(myQuery);
-            
-            int idPtmp;
-            
-            while(rset.next()){
-                
-                idPtmp = rset.getInt("ID_Enseignant");
-                
-                if(allProfsById.contains(idPtmp)){
-                    allProfsId.add(idPtmp);
-                }
-            }
-            
-            myQuery = ("Select * from seance_salles where seance_salles.ID_Seance = '"+allId.get(i)+"'");
-            
-            rset = stmt.executeQuery(myQuery);
-            
-            int idStmp;
-            
-            while(rset.next()){
-                
-                idStmp = rset.getInt("ID_Salle");
-                
-                if(allSallesById.contains(idStmp)){
-                    allSallesId.add(idStmp);
-                }
-            } 
         }
         
         if(cl.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
@@ -777,10 +824,24 @@ public class Connexion {
         
         if(finalInt){
             //call ajouter seance
-            ajouterSeance(date,heure_d,heure_f,Etat,cours,type,allGroupesById,allProfsById,allSallesById);
+            if(r_id==-1){
+                ajouterSeance(date,heure_d,heure_f,Etat,cours,type,allGroupesById,allProfsById,allSallesById);
+            }else{
+                //modif
+                supprimerSeance(r_id);
+                ajouterSeance(date,heure_d,heure_f,Etat,cours,type,allGroupesById,allProfsById,allSallesById);
+            }    
         }
+        
+        return finalInt;
     }
     
+    /**
+     *
+     * @param ids
+     * @return
+     * @throws SQLException
+     */
     public ArrayList groupesById(ArrayList ids) throws SQLException{
         ArrayList names;
         names = new ArrayList();
@@ -809,6 +870,12 @@ public class Connexion {
         return names;
     }
     
+    /**
+     *
+     * @param ids
+     * @return
+     * @throws SQLException
+     */
     public ArrayList profsById(ArrayList ids) throws SQLException{
         ArrayList names;
         names = new ArrayList();
@@ -826,6 +893,12 @@ public class Connexion {
         return names;
     }
     
+    /**
+     *
+     * @param ids
+     * @return
+     * @throws SQLException
+     */
     public ArrayList sallesById(ArrayList ids) throws SQLException{
         ArrayList names;
         names = new ArrayList();
@@ -852,5 +925,30 @@ public class Connexion {
             } 
         }
         return names;
+    }
+
+    /**
+     *
+     * @param id
+     * @throws java.sql.SQLException
+     */
+    public void supprimerSeance(int id) throws SQLException{ 
+        
+        PreparedStatement ps=conn.prepareStatement("DELETE FROM seances_enseignants WHERE seances_enseignants.ID_Seance='"+id+"'");
+        
+        ps.executeUpdate();
+        
+        ps=conn.prepareStatement("DELETE FROM seance_groupes WHERE seance_groupes.ID_Seance='"+id+"'");
+        
+        ps.executeUpdate();
+        
+        ps=conn.prepareStatement("DELETE FROM seance_salles WHERE seance_salles.ID_Seance='"+id+"'");
+        
+        ps.executeUpdate();
+        
+        ps=conn.prepareStatement("DELETE FROM seance WHERE seance.ID='"+id+"'");
+            
+        ps.executeUpdate();
+        
     }
 }

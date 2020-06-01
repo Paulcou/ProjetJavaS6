@@ -25,6 +25,7 @@ public class PageAjouterSeance extends javax.swing.JFrame {
     private JPanel container, containerBtn;
     private GridBagConstraints c;
     private JDateChooser jD;
+    private String emailUser;
     private JComboBox jCB_Groupes_Tmp, jCB_Profs_Tmp, jCB_Salles_Tmp;
     private int groupesSupp, profsSupp, sallesSupp;
     private ArrayList<JComboBox> allGroupBox, allProfBox, allSalleBox;
@@ -34,12 +35,15 @@ public class PageAjouterSeance extends javax.swing.JFrame {
     
     /**
      *
+     * @param email
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public PageAjouterSeance() throws SQLException, ClassNotFoundException{
+    public PageAjouterSeance(String email) throws SQLException, ClassNotFoundException{
         
         ins = new Insets(3, 3, 3, 3);
+        
+        this.emailUser = email;
         
         myConnexion = new Connexion("edt", "root", "");
         
@@ -376,8 +380,11 @@ public class PageAjouterSeance extends javax.swing.JFrame {
         
         btnSend.addActionListener((java.awt.event.ActionEvent evt) -> {
             try {
-                myConnexion.checkPourAjout(dateFormat.format(jD.getDate()), jCBHeure_Debut.getSelectedItem().toString(), jCBHeure_Fin.getSelectedItem().toString(), jCB_Etat.getSelectedItem().toString(),
-                        jCB_Cours.getSelectedItem().toString(), jCB_Type.getSelectedItem().toString(),allGroupBox, allProfBox, allSalleBox);
+                if(myConnexion.checkPourAjout(dateFormat.format(jD.getDate()), jCBHeure_Debut.getSelectedItem().toString(), jCBHeure_Fin.getSelectedItem().toString(), jCB_Etat.getSelectedItem().toString(),
+                        jCB_Cours.getSelectedItem().toString(), jCB_Type.getSelectedItem().toString(),allGroupBox, allProfBox, allSalleBox,-1)){
+                    this.setVisible(false);
+                    new PageEdt(emailUser);
+                }
             } catch (SQLException | ClassNotFoundException ex) {
                 Logger.getLogger(PageAjouterSeance.class.getName()).log(Level.SEVERE, null, ex);
             }
