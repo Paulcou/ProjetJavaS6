@@ -85,6 +85,17 @@ public class PageModifierSeance extends JFrame{
         this.getContentPane().add(containerBtn,"South");
         
         this.setVisible(true);
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                try {
+                    new PageEdt(emailUser);
+                } catch (SQLException | ClassNotFoundException ex) {
+                    Logger.getLogger(PageAjouterSeance.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
                 
     }
     

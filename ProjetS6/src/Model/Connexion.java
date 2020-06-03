@@ -951,4 +951,440 @@ public class Connexion {
         ps.executeUpdate();
         
     }
+    
+    public ArrayList<Carte>[][] sallesLibres(int week) throws SQLException{
+        ArrayList all = new ArrayList();
+        ArrayList seanceIds = new ArrayList();
+        ArrayList<Carte> allSeance = new ArrayList();
+        ArrayList<Carte>[][] tableau;
+        ArrayList salles = new ArrayList();
+        
+        salles.add("S1 - E1");
+        salles.add("S2 - E1");
+        salles.add("A1 - E1");
+        salles.add("S3 - E2");
+        salles.add("S4 - E2");
+        salles.add("A2 - E3");
+        salles.add("A3 - E3");
+        salles.add("S5 - E4");
+        salles.add("S6 - E4");
+        salles.add("A4 - E4");
+        
+        String myQuery = ("Select * from seance where seance.Semaine = '"+week+"'");
+
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next()){
+            seanceIds.add(rset.getInt("ID"));
+        }
+        
+        for(int i=0; i<seanceIds.size();i++){
+            allSeance.add(getSeanceById((int)seanceIds.get(i)));
+        }
+        
+        //tableau de arraylist 7*6 pour tous les horaires possibles et check si salle déjà prise dans allseance, sinon, ajouter dans le tableau qu'on returnera
+        tableau = new ArrayList[7][6];
+        
+        for(int i=0; i<7; i++){
+            for(int j=0;j<6; j++){
+                tableau[i][j] = new ArrayList<>(salles);
+            }
+        }
+        
+        int start,end,jour;
+        for(int i=0; i<allSeance.size();i++){
+            
+            start = allSeance.get(i).getHeureD()-1;
+            end = allSeance.get(i).getHeureF()-1;
+            
+            jour = allSeance.get(i).getJour()-2;
+            
+            if(start==end){
+                for (Object salle : allSeance.get(i).getSalles()) {
+                    tableau[start][jour].remove(salle);
+                }  
+            }else{
+                for(int j=start; j<=end; j++){
+                    for (Object salle : allSeance.get(i).getSalles()) {
+                        tableau[j][jour].remove(salle);
+                    }  
+                }
+            }
+        }
+        return tableau;
+    }
+    
+    public ArrayList<Recap> getRecap(ArrayList dates, String email) throws SQLException{
+        
+        String myQuery;
+        
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+email+"'";
+        
+        int ID = -1;
+        
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            ID = rset.getInt("ID");
+        }
+        
+        ArrayList seanceIds = new ArrayList();
+        
+        myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Enseignant = '"+ID+"'";
+        
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            seanceIds.add(rset.getInt("ID_Seance"));
+        }
+        
+        ArrayList<Carte> allSeances = new ArrayList<>();
+        ArrayList newSeanceIds = new ArrayList();
+        
+        for(int i=0; i<seanceIds.size(); i++){
+            
+            myQuery = "Select * from seance where seance.ID = '"+seanceIds.get(i)+"'";
+
+            rset = stmt.executeQuery(myQuery);
+            
+            String date;
+
+            while(rset.next())
+            {
+                date = rset.getString("Date");
+                if(dates.contains(date)){
+                   newSeanceIds.add(rset.getInt("ID"));
+                }
+            }  
+        }
+        
+        for(int i=0; i<newSeanceIds.size(); i++){
+            allSeances.add(getSeanceById((int)newSeanceIds.get(i)));
+        }
+        
+        ArrayList<Recap> allRecap = new ArrayList<>();       
+        Recap tmpRecap;
+        for(Carte allSeance : allSeances) {
+            for (Object groupe : allSeance.getGroupes()) {
+                
+                double nbr = (allSeance.getHeureF()-allSeance.getHeureD()+1)*1.5;
+                tmpRecap = new Recap(allSeance.getCours(), (String)groupe, nbr);
+                
+                boolean ok = true;
+                
+                for (Recap allRecap1 : allRecap) {
+                    if(allRecap1.getMatiere().equals(tmpRecap.getMatiere())&&allRecap1.getGroupe().equals(tmpRecap.getGroupe())){
+                        allRecap1.setNBH(tmpRecap.getNBH());
+                        ok = false;
+                    }
+                }
+                
+                if(ok){
+                    allRecap.add(tmpRecap);
+                }
+                
+            }
+        }
+        
+        return allRecap;
+    }
+    
+    public ArrayList<Recap> statsMatieresHeures(String email) throws SQLException{
+        String myQuery;
+        
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+email+"'";
+        
+        int ID = -1;
+        int droit = -1;
+        
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            ID = rset.getInt("ID");
+            droit = rset.getInt("Droit");
+        }
+        
+        ArrayList seanceIds = new ArrayList();
+        
+        if(droit==4){
+            
+            myQuery = "Select * from etudiant where etudiant.ID_Utilisateur = "+ID;
+            
+            int ID_Groupe = -1;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                ID_Groupe = rset.getInt("ID_Groupe");
+            }
+            
+            myQuery = "Select * from seance_groupes where seance_groupes.ID_Groupe = "+ID_Groupe;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+            
+        }else if(droit==3){
+            myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Enseignant = "+ID;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+        }
+        
+        ArrayList<Carte> allSeances = new ArrayList();
+        
+        for(int i=0; i<seanceIds.size(); i++){
+            allSeances.add(getSeanceById((int)seanceIds.get(i)));
+        }
+        
+        ArrayList<Recap> allRecap = new ArrayList<>();       
+        Recap tmpRecap;
+        
+        for(Carte allSeance : allSeances) {
+            double nbr = (allSeance.getHeureF()-allSeance.getHeureD()+1)*1.5;
+            tmpRecap = new Recap(allSeance.getCours(), "ok", nbr);
+            
+            boolean ok = true;
+                
+            for (Recap allRecap1 : allRecap) {
+                if(allRecap1.getMatiere().equals(tmpRecap.getMatiere())){
+                    allRecap1.setNBH(tmpRecap.getNBH());
+                    ok = false;
+                }
+            }
+            if(ok){
+                allRecap.add(tmpRecap);
+            }    
+        } 
+        return allRecap;
+    }
+    
+    public ArrayList<Recap> statsHeuresGroupesOuType(String email) throws SQLException{
+        String myQuery;
+        
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+email+"'";
+        
+        int ID = -1;
+        int droit = -1;
+        
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            ID = rset.getInt("ID");
+            droit = rset.getInt("Droit");
+        }
+        
+        ArrayList seanceIds = new ArrayList();
+        
+        if(droit==4){
+            
+            myQuery = "Select * from etudiant where etudiant.ID_Utilisateur = "+ID;
+            
+            int ID_Groupe = -1;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                ID_Groupe = rset.getInt("ID_Groupe");
+            }
+            
+            myQuery = "Select * from seance_groupes where seance_groupes.ID_Groupe = "+ID_Groupe;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+            
+        }else if(droit==3){
+            myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Enseignant = "+ID;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+        }
+        
+        ArrayList<Carte> allSeances = new ArrayList();
+        
+        for(int i=0; i<seanceIds.size(); i++){
+            allSeances.add(getSeanceById((int)seanceIds.get(i)));
+        }
+        
+        ArrayList<Recap> allRecap = new ArrayList<>();       
+        Recap tmpRecap;
+        
+        if(droit==3){
+            for(Carte allSeance : allSeances) {
+                for (Object groupe : allSeance.getGroupes()) {
+
+                    double nbr = (allSeance.getHeureF()-allSeance.getHeureD()+1)*1.5;
+                    tmpRecap = new Recap("ok", (String)groupe, nbr);
+
+                    boolean ok = true;
+
+                    for (Recap allRecap1 : allRecap) {
+                        if(allRecap1.getGroupe().equals(tmpRecap.getGroupe())){
+                            allRecap1.setNBH(tmpRecap.getNBH());
+                            ok = false;
+                        }
+                    }
+
+                    if(ok){
+                        allRecap.add(tmpRecap);
+                    }
+
+                }
+            }
+        }
+        
+        if(droit==4){
+            for(Carte allSeance : allSeances) {
+                
+                double nbr = (allSeance.getHeureF()-allSeance.getHeureD()+1)*1.5;
+                tmpRecap = new Recap(allSeance.getType(), "ok", nbr);
+
+                boolean ok = true;
+
+                for (Recap allRecap1 : allRecap) {
+                    if(allRecap1.getMatiere().equals(tmpRecap.getMatiere())){
+                        allRecap1.setNBH(tmpRecap.getNBH());
+                        ok = false;
+                    }
+                }
+
+                if(ok){
+                    allRecap.add(tmpRecap);
+                }
+            }
+        }
+        
+        return allRecap;
+    }
+    
+    public ArrayList<Recap> statsNbrHeuresCours(String email) throws SQLException{
+        String myQuery;
+        
+        myQuery = "Select * from utilisateur where utilisateur.Email = '"+email+"'";
+        
+        int ID = -1;
+        int droit = -1;
+        
+        rset = stmt.executeQuery(myQuery);
+
+        while(rset.next())
+        {
+            ID = rset.getInt("ID");
+            droit = rset.getInt("Droit");
+        }
+        
+        ArrayList seanceIds = new ArrayList();
+        
+        if(droit==4){
+            
+            myQuery = "Select * from etudiant where etudiant.ID_Utilisateur = "+ID;
+            
+            int ID_Groupe = -1;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                ID_Groupe = rset.getInt("ID_Groupe");
+            }
+            
+            myQuery = "Select * from seance_groupes where seance_groupes.ID_Groupe = "+ID_Groupe;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+            
+        }else if(droit==3){
+            myQuery = "Select * from seances_enseignants where seances_enseignants.ID_Enseignant = "+ID;
+
+            rset = stmt.executeQuery(myQuery);
+
+            while(rset.next())
+            {
+                seanceIds.add(rset.getInt("ID_Seance"));
+            }
+        }
+        
+        ArrayList<Carte> allSeances = new ArrayList();
+        
+        for(int i=0; i<seanceIds.size(); i++){
+            allSeances.add(getSeanceById((int)seanceIds.get(i)));
+        }
+        
+        ArrayList<Recap> allRecap = new ArrayList<>();       
+        Recap tmpRecap;
+        
+        //System.out.println("taille allSeance : "+allSeances.size());
+        
+        for(Carte allSeance : allSeances) {
+                
+            double nbr = (allSeance.getHeureF()-allSeance.getHeureD()+1)*1.5;
+            tmpRecap = new Recap(Integer.toString(allSeance.getSemaine()), "ok", nbr);
+
+            boolean ok = true;
+
+            for (Recap allRecap1 : allRecap) {
+                if(allRecap1.getMatiere().equals(tmpRecap.getMatiere())){
+                    allRecap1.setNBH(tmpRecap.getNBH());
+                    ok = false;
+                }
+            }
+
+            if(ok){
+                allRecap.add(tmpRecap);
+            }
+        }
+        
+        int min = 1000000;
+        int max = -1;
+        for(Recap allR : allRecap){
+            if(Integer.parseInt(allR.getMatiere())<min){
+                min = Integer.parseInt(allR.getMatiere());
+            }
+            if(Integer.parseInt(allR.getMatiere())>max){
+                max = Integer.parseInt(allR.getMatiere());
+            }
+        }
+        
+        boolean ok = true;
+        
+        for(int i=min+1; i<max;i++){
+            tmpRecap = new Recap(Integer.toString(i), "ok", 0);
+            for (Recap allRecap1 : allRecap) {
+                if(allRecap1.getMatiere().equals(tmpRecap.getMatiere())){
+                    ok = false;
+                }
+            }
+
+            if(ok){
+                allRecap.add(tmpRecap);
+            }
+        }
+        
+        return allRecap;
+    }
 }

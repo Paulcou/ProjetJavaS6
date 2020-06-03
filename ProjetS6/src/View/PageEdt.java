@@ -6,11 +6,13 @@
 package View;
 
 import Model.*;
+import com.toedter.calendar.JDateChooser;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +23,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Date;
 import javax.swing.*;
+import javax.swing.border.Border;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.general.PieDataset;
+
 
 /**
  *
@@ -33,12 +46,17 @@ public class PageEdt extends javax.swing.JFrame {
     private String emailUser, searchString, newLogin;
     private JLabel h2,h3,h4,h5,h6,h7,h8,j1,j2,j3,j4,j5,j6,tmp;
     private GridBagConstraints c;
-    private boolean display;
+    private int display;
     private ArrayList<Carte> allCartes;
     private int weekInt,droit;
-    private Insets ins;
+    private Insets ins, ins2, ins3;
     
-    
+    /**
+     * Constructeur
+     * @param email
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
     public PageEdt(String email) throws SQLException, ClassNotFoundException{
         
         emailUser = email;
@@ -55,9 +73,13 @@ public class PageEdt extends javax.swing.JFrame {
         
         c = new GridBagConstraints();
         
-        display = true;
+        display = 1;
         
         ins = new Insets(1, 1, 1, 1);
+        
+        ins2 = new Insets(1, 0, 1, 0);
+        
+        ins3 = new Insets(20, 0, 20, 0);
 
         this.setTitle("Emploi du temps");
         this.setSize(1315, 680);
@@ -82,12 +104,15 @@ public class PageEdt extends javax.swing.JFrame {
         afficherCours();
         
         afficherComplement();
-        
+
         this.getContentPane().add(container,"North");
         this.getContentPane().add(weekContainer, "South");
-        this.setVisible(true);
+        this.setVisible(true); 
     }
     
+    /**
+     * Méthode qui affiche les composants da la barre de menu en fonction des droits de l'utilisateur
+     */
     private void afficherMenuBar(){
         
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
@@ -108,19 +133,62 @@ public class PageEdt extends javax.swing.JFrame {
         
         JMenuItem classique = new JMenuItem("Grille");
         JMenuItem grille = new JMenuItem("Ligne");
+        JMenuItem recapitulatif = new JMenuItem("Récapitulatif");
+        JMenuItem sLibres = new JMenuItem("Salles libres");
+        JMenuItem stats = new JMenuItem("Statistiques");
         
         classique.addActionListener((java.awt.event.ActionEvent evt) -> {
-            display = true;
-            clsBtnActionPerformed(evt);
+            display = 1;
+            try {
+                griBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
         
         grille.addActionListener((java.awt.event.ActionEvent evt) -> {
-            display = false;
-            griBtnActionPerformed(evt);
+            display = 2;
+            try {
+                griBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        recapitulatif.addActionListener((java.awt.event.ActionEvent evt) -> {
+            display = 3;
+            try {
+                griBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        sLibres.addActionListener((java.awt.event.ActionEvent evt) -> {
+            display = 4;
+            try {
+                griBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        stats.addActionListener((java.awt.event.ActionEvent evt) -> {
+            display = 5;
+            try {
+                griBtnActionPerformed(evt);
+            } catch (SQLException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
         
         edt.add(classique);
         edt.add(grille);
+        if(droit!=4){
+            edt.add(recapitulatif);
+        }       
+        edt.add(sLibres);
+        edt.add(stats);
         
         JMenu spaceBetween = new JMenu("   ");
         spaceBetween.setEnabled(false);
@@ -162,10 +230,6 @@ public class PageEdt extends javax.swing.JFrame {
             bar.add(sBtn);
             bar.add(spaceBetween4);
         }
-
-        JButton statBtn = new JButton("Statistiques");
-        bar.add(statBtn);
-        bar.add(spaceBetween5);
         
         if(droit == 1){
             JButton addBtn = new JButton("Ajouter une séance");
@@ -184,10 +248,24 @@ public class PageEdt extends javax.swing.JFrame {
         }
         
         
+        
         bar.add(new JLabel("Semaine "+weekInt));
         
         bar.add(spaceBetween7);
         bar.add(new JLabel(emailUser));
+        
+        JButton deco = new JButton("Se déconnecter");
+        bar.add(spaceBetween5);
+        bar.add(deco);
+        
+        deco.addActionListener((java.awt.event.ActionEvent evt) -> {
+            this.setVisible(false);
+            try {
+                new PageConnexion();
+            } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         
         this.setJMenuBar(bar);
     }
@@ -199,26 +277,20 @@ public class PageEdt extends javax.swing.JFrame {
         newLogin = myConnexion.searchEmail(searchString);
        
         if(!"".equals(newLogin)){
-            container.removeAll();
-            afficherTitresEdt();
             allCartes = myConnexion.allSeances(newLogin);
-            afficherCours();
-            afficherComplement();
-            container.revalidate();
-            container.repaint();
+            switchAffichage();
         }else{
             JOptionPane.showMessageDialog(null, "Nom non reconnu", "Information", JOptionPane.INFORMATION_MESSAGE);
         }
     }
-    
-    private void clsBtnActionPerformed(java.awt.event.ActionEvent evt){
+        
+    private void griBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException{
         switchAffichage();
     }
     
-    private void griBtnActionPerformed(java.awt.event.ActionEvent evt){
-        switchAffichage();
-    }
-    
+    /**
+     * Méthode qui affiche les jours et les horaires sur un emploi du temps en mode grille
+     */
     private void afficherTitresEdt(){
         
         j1 = new JLabel("<html><div style='padding:2px;background-color:#EEEEEE;border-left:2px solid black; border-top:2px solid black; height:40px; width:206;'>"
@@ -376,6 +448,9 @@ public class PageEdt extends javax.swing.JFrame {
         container.add(h8, c);
     }
     
+    /**
+     * Méthode qui affiche tous les cours de l'utilisateur ou de la personne recherchée
+     */
     private void afficherCours(){
         
         int nbrDisplay = 0;
@@ -555,6 +630,9 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
+    /**
+     * Méthode qui comble les espaces vides (là où il n'y a pas de cours)
+     */
     private void afficherComplement(){
         for(int i=2;i<15;i++){
             for(int j=1;j<7;j++){
@@ -592,24 +670,56 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
-    private void switchAffichage(){
+    /**
+     * Méthode qui permet de switch entre les différents affichages (en grille, en ligne, récap et salles vides)
+     * @throws SQLException 
+     */
+    private void switchAffichage() throws SQLException{
         
         container.removeAll();
+        weekContainer.removeAll();
         
-        if(display){
-            afficherTitresEdt();
-            afficherCours();
-            afficherComplement();
-            container.revalidate();
-            container.repaint();
-        }else{
-            afficherCoursLigne();
-            container.revalidate();
-            container.repaint();
+        Date date = new Date();
+        
+        switch (display) {
+            case 1:
+                afficherTitresEdt();
+                afficherCours();
+                afficherComplement();
+                afficherSemaines();
+                break;
+            case 2:
+                afficherCoursLigne();
+                afficherSemaines();
+                break;
+        //récap
+            case 3:
+                afficherRecapSearch();
+                afficherRecap(date, date);
+                break;
+        //salles libres
+            case 4:
+                afficherTitresEdt();
+                afficherSallesLibres();
+                afficherComplement();
+                afficherSemaines();
+                break;
+            default:
+                afficherStats();
+                break;
         }
+        
+        container.revalidate();
+        container.repaint();
+        
+        weekContainer.revalidate();
+        weekContainer.repaint();
         
     }
     
+    /**
+     * Méthode qui affiche les cours en ligne 
+     */
     private void afficherCoursLigne(){
         Couleur color = new Couleur();
         ArrayList<String> jours;
@@ -645,60 +755,55 @@ public class PageEdt extends javax.swing.JFrame {
         
         for(int i=0; i<allCartes.size();i++){
             if(allCartes.get(i).getSemaine()==weekInt){
-                //c.insets = ins;
+
                 c.gridx = 0;
                 c.gridy = i;
+                if(droit!=1){
+                    c.insets = new Insets(1, 0, 1, 0);
+                }
 
-                //if(i==allCartes.size()-1){
-                    container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:1px;width:800px;border:solid black;border-width:thin;'>"
-                                        + "<p style='text-align:left'>Semaine "+allCartes.get(i).getSemaine()+" | "
-                                        +jours.get(allCartes.get(i).getJour()-2)+" | "
-                                        +heureD.get(allCartes.get(i).getHeureD()-1)+" - "
-                                        +heureF.get(allCartes.get(i).getHeureF()-1)+" | "
-                                        +allCartes.get(i).getCours()+" | "+allCartes.get(i).getType()
-                                        +" | "+allCartes.get(i).getSalle()
-                                        +" | "+allCartes.get(i).getProf()+" | "+allCartes.get(i).getGroupe()+"</p>"
-                                        + "</div></html>"), c);
-                //}else{
-                    /*container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:800px;height:20px;border-left:2px solid black;border-top:2px solid black;border-right:2px solid black;'>"
-                                        + "<p style='text-align:left'>Semaine "+allCartes.get(i).getSemaine()+" | "
-                                        +jours.get(allCartes.get(i).getJour()-2)+" | "
-                                        +heureD.get(allCartes.get(i).getHeureD()-1)+" - "
-                                        +heureF.get(allCartes.get(i).getHeureF()-1)+" | "
-                                        +allCartes.get(i).getCours()+" | "+allCartes.get(i).getType()
-                                        +" | "+allCartes.get(i).getSalle()
-                                        +" | "+allCartes.get(i).getProf()+" | "+allCartes.get(i).getGroupe()+"</p>"
-                                        + "</div></html>"), c);*/
-                //}
-                //c.insets = ins;
-                c.gridx = 1;
-                c.gridy = i;
-                
-                tmpButton = new JButton("<html><p id="+allCartes.get(i).getSeanceID()+">Modifier</p></html>");
-                
-                tmpButton.addActionListener((java.awt.event.ActionEvent evt) -> {
-                    String res = evt.toString();
-                    int start = res.indexOf("id")+3;
-                    int end = res.indexOf(">Modifier");
-                    String seanceID = "";
-                    for(int j=start;j<end;j++){
-                        seanceID+=res.charAt(j);
-                    }
-                    try {
-                        this.setVisible(false);
-                        new PageModifierSeance(Integer.parseInt(seanceID),newLogin);
-                    } catch (SQLException | ClassNotFoundException | ParseException ex) {
-                        Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    
-                });
-                
-                container.add(tmpButton,c);
-                
+                container.add(new JLabel("<html><div style='background-color:"+color.getCouleurs(allCartes.get(i).getCoursID())+";padding:2px;width:800px;border:solid black;border-width:thin;'>"
+                                    + "<p style='text-align:left'>Semaine "+allCartes.get(i).getSemaine()+" | "
+                                    +jours.get(allCartes.get(i).getJour()-2)+" | "
+                                    +heureD.get(allCartes.get(i).getHeureD()-1)+" - "
+                                    +heureF.get(allCartes.get(i).getHeureF()-1)+" | "
+                                    +allCartes.get(i).getCours()+" | "+allCartes.get(i).getType()
+                                    +" | "+allCartes.get(i).getSalle()
+                                    +" | "+allCartes.get(i).getProf()+" | "+allCartes.get(i).getGroupe()+"</p>"
+                                    + "</div></html>"), c);
+                c.insets = new Insets(0, 0, 0, 0);
+                if(droit==1){
+                    c.gridx = 1;
+                    c.gridy = i;
+
+                    tmpButton = new JButton("<html><p id="+allCartes.get(i).getSeanceID()+">Modifier</p></html>");
+
+                    tmpButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+                        String res = evt.toString();
+                        int start = res.indexOf("id")+3;
+                        int end = res.indexOf(">Modifier");
+                        String seanceID = "";
+                        for(int j=start;j<end;j++){
+                            seanceID+=res.charAt(j);
+                        }
+                        try {
+                            this.setVisible(false);
+                            new PageModifierSeance(Integer.parseInt(seanceID),newLogin);
+                        } catch (SQLException | ClassNotFoundException | ParseException ex) {
+                            Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    });
+
+                    container.add(tmpButton,c);
+                }  
             }
         }
     }
     
+    /**
+     * Méthode qui affiche la barre des semaines en bas de page pour jongler entre elles
+     */
     private void afficherSemaines(){
         int x = 0;
         for(int i=1;i<53;i++){
@@ -750,13 +855,32 @@ public class PageEdt extends javax.swing.JFrame {
                     weekContainer.repaint();
                     
                     container.removeAll();
-                    if(display){
-                        afficherTitresEdt();
-                        afficherCours();
-                        afficherComplement();
-                    }else{
-                        afficherCoursLigne(); 
-                    }   
+                    
+                    switch (display) {
+                        case 1:
+                            afficherTitresEdt();
+                            afficherCours();
+                            afficherComplement();
+                            break;
+                        case 2:
+                            afficherCoursLigne();
+                            break;
+                        case 3:
+                            //récpa
+                            break;
+                        default:
+                            //sLibres
+                            afficherTitresEdt();
+                            {
+                                try {
+                                    afficherSallesLibres();
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                            afficherComplement();
+                            break;
+                    }
                     container.revalidate();
                     container.repaint();
                 }
@@ -765,4 +889,302 @@ public class PageEdt extends javax.swing.JFrame {
             x += 1;
         }
     }
+    
+    /**
+     * Méthode qui permet d'afficher les salles libres
+     * @throws SQLException
+     */
+    public void afficherSallesLibres() throws SQLException{
+        ArrayList<Carte>[][] tab;
+        tab = myConnexion.sallesLibres(weekInt);
+        
+        for(int i=0;i<7;i++){
+            for(int j=0; j<6;j++)
+            {
+                c.gridx = j+1;
+                c.gridy = (i+1)*2;
+                
+                if(j==5){
+                    container.add(new JLabel("<html><div style='background-color:#CCCCCC;padding:2px;width:159px;height:42px;border:2px solid black;'>"
+                                    + "<p style='text-align:center'>"+tab[i][j]+"</p>"
+                                    + "</div></html>"),c);
+                }else if((j+1)%2==1){
+                    container.add(new JLabel("<html><div style='background-color:#EEEEEE;padding:2px;width:159px;height:42px;border-left:2px solid black;border-top:2px solid black;border-bottom:2px solid black;'>"
+                                    + "<p style='text-align:center'>"+tab[i][j]+"</p>"
+                                    + "</div></html>"),c);
+                }else{
+                    container.add(new JLabel("<html><div style='background-color:#CCCCCC;padding:2px;width:159px;height:42px;border-left:2px solid black;border-top:2px solid black;border-bottom:2px solid black;'>"
+                                    + "<p style='text-align:center'>"+tab[i][j]+"</p>"
+                                    + "</div></html>"),c);
+                }
+                
+            }
+        }
+    }
+    
+    /**
+     * Méthode qui permet d'afficher l'espace de recherche en bas du récap
+     */
+    public void afficherRecapSearch(){
+        c.gridx = 0;
+        c.gridy = 0;
+        c.insets = ins;
+        weekContainer.add(new JLabel("Du"),c);
+        
+        Date date = new Date();
+
+        JDateChooser jD = new JDateChooser(date);
+        
+        Dimension prefDimension = new Dimension(106, 24);
+        
+        jD.setPreferredSize(prefDimension);
+        
+        c.gridx = 1;
+        c.gridy = 0;
+        c.insets = ins;
+        weekContainer.add(jD,c);
+        
+        c.gridx = 2;
+        c.gridy = 0;
+        c.insets = ins;
+        weekContainer.add(new JLabel("Au"),c);
+        
+        JDateChooser jD2 = new JDateChooser(date);
+        
+        jD2.setPreferredSize(prefDimension);
+        
+        c.gridx = 3;
+        c.gridy = 0;
+        c.insets = ins;
+        weekContainer.add(jD2,c);
+        
+        c.gridx = 4;
+        c.gridy = 0;
+        c.insets = ins;
+        JButton btn = new JButton("Rechercher");
+        weekContainer.add(btn,c);
+        
+        c.insets = new Insets(0, 0, 0, 0);
+        
+        btn.addActionListener((java.awt.event.ActionEvent evt) -> { 
+            
+            afficherRecap(jD.getDate(),jD2.getDate());
+                    
+        });
+    }
+    
+    /**
+     * Méthode qui affiche le récap des cours d'un professeur
+     * @param jD
+     * @param jD2 
+     */
+    public void afficherRecap(Date jD, Date jD2){
+        
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        
+        ArrayList<String> dates = new ArrayList<>();
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(jD);
+
+        Calendar endTime = new GregorianCalendar();
+        endTime.setTime(jD2);
+        endTime.add(Calendar.DAY_OF_YEAR, 1);
+
+        while (calendar.getTime().before(endTime.getTime()))
+        {
+            Date result = calendar.getTime();
+            dates.add(dateFormat.format(result));
+            calendar.add(Calendar.DATE, 1);
+        }
+
+        try {
+            ArrayList<Recap> allRecap = myConnexion.getRecap(dates, newLogin);
+
+            container.removeAll();
+
+            c.gridx = 0;
+            c.gridy = 0;
+            c.insets = ins2;
+            container.add(new JLabel("<html><div style='background-color:#ADFF2F;width:333px;padding:2px;border:solid black;border-width:thin;'>"
+                                    + "<p style='text-align:center'>Matière</p>"
+                                    + "</div></html>"),c);
+
+            c.gridx = 1;
+            c.gridy = 0;
+            c.insets = ins2;
+            container.add(new JLabel("<html><div style='background-color:#ADFF2F;width:333px;padding:2px;border-top:solid black;border-bottom:solid black;border-right:solid black;border-width:thin;'>"
+                                    + "<p style='text-align:center'>Groupe</p>"
+                                    + "</div></html>"),c);
+
+            c.gridx = 2;
+            c.gridy = 0;
+            c.insets = ins2;
+            container.add(new JLabel("<html><div style='background-color:#ADFF2F;width:333px;padding:2px;border-right:solid black;border-top:solid black;border-bottom:solid black;border-width:thin;'>"
+                                    + "<p style='text-align:center'>Nombre d'heures</p>"
+                                    + "</div></html>"),c);
+
+            for (int i=0;i<allRecap.size();i++) {
+                //System.out.println("Matiere : "+allRecap1.getMatiere()+" Groupe : "+allRecap1.getGroupe()+" NB Heures : "+allRecap1.getNBH());
+                c.gridx = 0;
+                c.gridy = i+1;
+                c.insets = ins2;
+                container.add(new JLabel("<html><div style='background-color:#98FB98;width:333px;padding:2px;border:solid black;border-width:thin;'>"
+                                        + "<p style='text-align:center'>"+allRecap.get(i).getMatiere()+"</p>"
+                                        + "</div></html>"),c);
+
+                c.gridx = 1;
+                c.gridy = i+1;
+                c.insets = ins2;
+                container.add(new JLabel("<html><div style='background-color:#98FB98;width:333px;padding:2px;border-top:solid black;border-right:solid black;border-bottom:solid black;border-width:thin;'>"
+                                        + "<p style='text-align:center'>"+allRecap.get(i).getGroupe()+"</p>"
+                                        + "</div></html>"),c);
+
+                c.gridx = 2;
+                c.gridy = i+1;
+                c.insets = ins2;
+                container.add(new JLabel("<html><div style='background-color:#98FB98;width:333px;padding:2px;border-right:solid black;border-top:solid black;border-bottom:solid black;border-width:thin;'>"
+                                        + "<p style='text-align:center'>"+allRecap.get(i).getNBH()+"</p>"
+                                        + "</div></html>"),c);   
+            }
+            c.insets = new Insets(0, 0, 0, 0);
+            container.revalidate();
+            container.repaint();
+        } catch (SQLException ex) {
+            Logger.getLogger(PageEdt.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Méthode qui affiche les statistiques 
+     */
+    public void afficherStats() throws SQLException{
+        
+        ArrayList<Recap> allRecaps = myConnexion.statsMatieresHeures(newLogin);
+        
+        if(allRecaps.size()>0){
+
+            DefaultPieDataset dataset = new DefaultPieDataset();
+
+            //DecimalFormat df = new DecimalFormat("###.##");
+
+            for(Recap rec : allRecaps){
+                dataset.setValue(rec.getMatiere()+" ("+rec.getNBH()+")",rec.getNBH());//+" ("+df.format(rec.getNBH()/total*100)+"%)", rec.getNBH()/total*100);
+            }
+
+            JFreeChart chart = ChartFactory.createPieChart(      
+             "Nombre d'heures / matière",   // chart title 
+             dataset,          // data    
+             true,             // include legend   
+             true, 
+             false);
+
+            chart.getPlot().setBackgroundPaint( Color.WHITE );
+
+            ChartPanel CP = new ChartPanel(chart);
+
+            CP.setBorder(BorderFactory.createLineBorder(Color.black));
+
+            CP.setPreferredSize(new Dimension(400, 260));
+
+            c.gridx = 0;
+            c.gridy = 0;
+            c.insets = ins3;
+            container.add(CP,c);
+        }
+        
+        ArrayList<Recap> allRecaps2 = myConnexion.statsHeuresGroupesOuType(newLogin);
+        
+        if(allRecaps2.size()>0){
+            
+            DefaultPieDataset dataset = new DefaultPieDataset();
+            
+            JFreeChart chart;
+            
+            if("ok".equals(allRecaps2.get(0).getMatiere())){
+                
+                for(Recap rec : allRecaps2){
+                    dataset.setValue(rec.getGroupe()+" ("+rec.getNBH()+")",rec.getNBH());//+" ("+df.format(rec.getNBH()/total*100)+"%)", rec.getNBH()/total*100);
+                }
+                
+                chart = ChartFactory.createPieChart(      
+                    "Nombre d'heures / groupe",   // chart title 
+                    dataset,          // data    
+                    true,             // include legend   
+                    true, 
+                    false);
+                
+            }else{
+                for(Recap rec : allRecaps2){
+                    dataset.setValue(rec.getMatiere()+" ("+rec.getNBH()+")",rec.getNBH());//+" ("+df.format(rec.getNBH()/total*100)+"%)", rec.getNBH()/total*100);
+                }
+
+                chart = ChartFactory.createPieChart(      
+                    "Nombre d'heures / type de cours",   // chart title 
+                    dataset,          // data    
+                    true,             // include legend   
+                    true, 
+                    false);
+            }
+
+            chart.getPlot().setBackgroundPaint( Color.WHITE );
+
+            ChartPanel CP = new ChartPanel(chart);
+
+            CP.setBorder(BorderFactory.createLineBorder(Color.black));
+
+            CP.setPreferredSize(new Dimension(400, 260));
+
+            c.gridx = 1;
+            c.gridy = 0;
+            c.insets = ins3;
+            container.add(CP,c);
+            
+        }
+        
+        ArrayList<Recap> allRecaps3 = myConnexion.statsNbrHeuresCours(newLogin);
+        
+        if(allRecaps3.size()>0){
+            
+            Collections.sort(allRecaps3,Recap.recapComparator);
+            
+            DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
+            
+            for(Recap rec : allRecaps3){
+                line_chart_dataset.addValue( rec.getNBH() , "Nombre d'heures" , rec.getMatiere() );
+            }
+            
+            JFreeChart lineChart = ChartFactory.createLineChart(
+                "Nombres d'heures / semaine",
+                "Semaines","Nombre d'heures",
+                line_chart_dataset,
+                PlotOrientation.VERTICAL,
+                true,true,false);
+            
+            lineChart.getPlot().setBackgroundPaint( Color.WHITE );
+            
+            CategoryPlot plot = (CategoryPlot) lineChart.getPlot();
+            
+            LineAndShapeRenderer renderer = new LineAndShapeRenderer();
+            
+            plot.setRenderer(renderer);
+            
+            ChartPanel CP = new ChartPanel(lineChart);
+
+            CP.setBorder(BorderFactory.createLineBorder(Color.black));
+
+            CP.setPreferredSize(new Dimension(400, 260));
+
+            c.gridx = 0;
+            c.gridy = 1;
+            c.insets = ins2;
+            container.add(CP,c);
+        }
+        
+        c.insets = new Insets(0, 0, 0, 0);
+        
+    }
+    
+    
+    
 }

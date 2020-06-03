@@ -46,6 +46,21 @@ public class Carte {
         etat = r_etat;
     }
     
+    public Carte(int r_semaine, int r_h_d, int r_h_f, int r_jour,ArrayList r_sallesID, ArrayList r_sitesID, int r_id){
+        semaine = r_semaine;
+        seanceID = r_id;
+        heure_d = r_h_d;
+        heure_f = r_h_f;
+        salles = new ArrayList(r_sallesID);
+        sites = new ArrayList(r_sitesID);
+        jour = r_jour;
+        
+        profs = new ArrayList();
+        groupes = new ArrayList();
+        cours = "";
+        type = "";
+    }
+    
     public void setCours(String c){
         cours = c;
     }
