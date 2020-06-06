@@ -37,6 +37,11 @@ public class AjoutException extends Exception {
         super(msg);
     }
     
+    /**
+     *
+     * @param allProfsId
+     * @throws SQLException
+     */
     public void profsNonLibres(ArrayList allProfsId) throws SQLException{
         ArrayList allProfs;
         allProfs = new ArrayList(myConnexion.profsById(allProfsId));
@@ -51,6 +56,11 @@ public class AjoutException extends Exception {
         }
     }
     
+    /**
+     *
+     * @param allGroupesId
+     * @throws SQLException
+     */
     public void groupesNonLibres(ArrayList allGroupesId) throws SQLException{
         ArrayList allGroupes;
         allGroupes = new ArrayList(myConnexion.groupesById(allGroupesId));
@@ -65,6 +75,11 @@ public class AjoutException extends Exception {
         }
     }
     
+    /**
+     *
+     * @param allSallesId
+     * @throws SQLException
+     */
     public void sallesNonLibres(ArrayList allSallesId) throws SQLException{
         ArrayList allSalles;
         allSalles = new ArrayList(myConnexion.sallesById(allSallesId));
@@ -79,6 +94,9 @@ public class AjoutException extends Exception {
         }
     }
     
+    /**
+     *
+     */
     public void dimanche(){
         JOptionPane.showMessageDialog(null, "Pas de cours le dimanche.", "Information", JOptionPane.INFORMATION_MESSAGE);
     }

@@ -15,6 +15,9 @@ public class Carte {
     private ArrayList profs, salles, groupes, sites;
     private int semaine, jour, heure_d, heure_f, coursID, seanceID, etat;
     
+    /**
+     *
+     */
     public Carte(){
         cours = "";
         type = "";
@@ -29,6 +32,23 @@ public class Carte {
         seanceID = -1;
     }
     
+    /**
+     *
+     * @param r_cours
+     * @param r_type
+     * @param r_profs
+     * @param r_salles
+     * @param r_groupes
+     * @param r_sites
+     * @param r_semaine
+     * @param r_jours
+     * @param r_debut
+     * @param r_fin
+     * @param r_coursID
+     * @param r_seanceID
+     * @param r_date
+     * @param r_etat
+     */
     public Carte(String r_cours, String r_type, ArrayList r_profs, ArrayList r_salles, ArrayList r_groupes, ArrayList r_sites, int r_semaine, int r_jours, int r_debut, int r_fin, int r_coursID, int r_seanceID, String r_date, int r_etat){
         cours = r_cours;
         type = r_type;
@@ -46,6 +66,16 @@ public class Carte {
         etat = r_etat;
     }
     
+    /**
+     *
+     * @param r_semaine
+     * @param r_h_d
+     * @param r_h_f
+     * @param r_jour
+     * @param r_sallesID
+     * @param r_sitesID
+     * @param r_id
+     */
     public Carte(int r_semaine, int r_h_d, int r_h_f, int r_jour,ArrayList r_sallesID, ArrayList r_sitesID, int r_id){
         semaine = r_semaine;
         seanceID = r_id;
@@ -61,35 +91,82 @@ public class Carte {
         type = "";
     }
     
+    /**
+     *
+     * @param c
+     */
     public void setCours(String c){
         cours = c;
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setType(String c){
         type = c;
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setSite(ArrayList c){
         sites = new ArrayList(c);
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setSalle(ArrayList c){
         salles = new ArrayList(c);
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setProf(ArrayList c){
         profs = new ArrayList(c);
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setGroupe(ArrayList c){
         groupes = new ArrayList(c);
     }
+
+    /**
+     *
+     * @param c
+     */
     public void setSemaine(int c){
         semaine = c;
     }
     
-    
+    /**
+     *
+     * @return
+     */
     public String getCours(){
         return cours;
     }
+
+    /**
+     *
+     * @return
+     */
     public String getType(){
         return type;
     }
+
+    /**
+     *
+     * @return
+     */
     public String getSite(){
         String finalString = "";
         for(int i=0; i<sites.size(); i++){
@@ -98,9 +175,19 @@ public class Carte {
         }
         return finalString;
     }
+
+    /**
+     *
+     * @return
+     */
     public ArrayList getSites(){
         return sites;
     }
+
+    /**
+     *
+     * @return
+     */
     public String getSalle(){
         String finalString = "";
         for(int i=0; i<salles.size(); i++){
@@ -109,9 +196,19 @@ public class Carte {
         }
         return finalString;
     }
+
+    /**
+     *
+     * @return
+     */
     public ArrayList getSalles(){
         return salles;
     }
+
+    /**
+     *
+     * @return
+     */
     public String getProf(){
         String finalString = "";
         for(int i=0; i<profs.size(); i++){
@@ -120,9 +217,19 @@ public class Carte {
         }
         return finalString;
     }
+
+    /**
+     *
+     * @return
+     */
     public ArrayList getProfs(){
         return profs;
     }
+
+    /**
+     *
+     * @return
+     */
     public String getGroupe(){
         String finalString = "";
         for(int i=0; i<groupes.size(); i++){
@@ -131,34 +238,82 @@ public class Carte {
         }
         return finalString;
     }
+
+    /**
+     *
+     * @return
+     */
     public ArrayList getGroupes(){
         return groupes;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getSemaine(){
         return semaine;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getJour(){
         return jour;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getHeureD(){
         return heure_d;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getHeureF(){
         return heure_f;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getCoursID(){
         return coursID;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getSeanceID(){
         return seanceID;
     } 
+
+    /**
+     *
+     * @return
+     */
     public String getDate(){
         return date;
     }
+
+    /**
+     *
+     * @return
+     */
     public int getEtat(){
         return etat;
     }
 
+    /**
+     *
+     */
     public static Comparator<Carte> carteComparator = (Carte s1, Carte s2) -> {
         if(s1.getSemaine()==s2.getSemaine()){
             if(s1.getJour()==s2.getJour()){

@@ -15,6 +15,9 @@ public class Couleur {
        
     private ArrayList<String> couleurs;
 
+    /**
+     *
+     */
     public Couleur() {
         
         couleurs = new ArrayList<>();
@@ -22,11 +25,16 @@ public class Couleur {
         couleurs.add("#DFF2FF");
         couleurs.add("#B0F2B6");
         couleurs.add("#98FB98");
-        couleurs.add("#FF5E4D");
+        couleurs.add("#FFA07A");
         couleurs.add("#FDBFB7");
         couleurs.add("#E6E6FA");
     }
     
+    /**
+     *
+     * @param i
+     * @return
+     */
     public String getCouleurs(int i){
         return couleurs.get(i-1);
     }

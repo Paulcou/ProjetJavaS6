@@ -25,7 +25,7 @@ public class PageAjouterSeance extends javax.swing.JFrame {
     private JPanel container, containerBtn;
     private GridBagConstraints c;
     private JDateChooser jD;
-    private String emailUser;
+    private String emailUser, searchEmail;
     private JComboBox jCB_Groupes_Tmp, jCB_Profs_Tmp, jCB_Salles_Tmp;
     private int groupesSupp, profsSupp, sallesSupp;
     private ArrayList<JComboBox> allGroupBox, allProfBox, allSalleBox;
@@ -36,14 +36,16 @@ public class PageAjouterSeance extends javax.swing.JFrame {
     /**
      *
      * @param email
+     * @param email2
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public PageAjouterSeance(String email) throws SQLException, ClassNotFoundException{
+    public PageAjouterSeance(String email, String email2) throws SQLException, ClassNotFoundException{
         
         ins = new Insets(3, 3, 3, 3);
         
         this.emailUser = email;
+        this.searchEmail = email2;
         
         myConnexion = new Connexion("edt", "root", "");
         
@@ -80,7 +82,7 @@ public class PageAjouterSeance extends javax.swing.JFrame {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 try {
-                    new PageEdt(emailUser);
+                    new PageEdt(emailUser, searchEmail);
                 } catch (SQLException | ClassNotFoundException ex) {
                     Logger.getLogger(PageAjouterSeance.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -394,7 +396,7 @@ public class PageAjouterSeance extends javax.swing.JFrame {
                 if(myConnexion.checkPourAjout(dateFormat.format(jD.getDate()), jCBHeure_Debut.getSelectedItem().toString(), jCBHeure_Fin.getSelectedItem().toString(), jCB_Etat.getSelectedItem().toString(),
                         jCB_Cours.getSelectedItem().toString(), jCB_Type.getSelectedItem().toString(),allGroupBox, allProfBox, allSalleBox,-1)){
                     this.setVisible(false);
-                    new PageEdt(emailUser);
+                    new PageEdt(emailUser, searchEmail);
                 }
             } catch (SQLException | ClassNotFoundException ex) {
                 Logger.getLogger(PageAjouterSeance.class.getName()).log(Level.SEVERE, null, ex);
