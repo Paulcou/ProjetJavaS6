@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Date;
 import javax.swing.*;
-import javax.swing.border.Border;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -32,7 +31,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.general.PieDataset;
 
 
 /**
@@ -322,6 +320,10 @@ public class PageEdt extends javax.swing.JFrame {
         this.setJMenuBar(bar);
     }
     
+    /*
+     * Méthode appelée sur un bouton
+     *
+     */
     private void sBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException {
         
         // On va chercher l'email de la personne recherchée.
@@ -337,6 +339,10 @@ public class PageEdt extends javax.swing.JFrame {
         }
     }
     
+    /*
+     * Méthode appelée sur un bouton
+     *
+     */
     private void ssBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException {
         
         allCartes = myConnexion.allSeancesBySalle(searchSalleString);
@@ -344,7 +350,11 @@ public class PageEdt extends javax.swing.JFrame {
         switchAffichage();
         
     }
-        
+    
+    /*
+     * Méthode appelée sur un bouton
+     *
+     */
     private void griBtnActionPerformed(java.awt.event.ActionEvent evt) throws SQLException{
         switchAffichage();
     }

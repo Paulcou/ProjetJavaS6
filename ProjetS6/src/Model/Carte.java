@@ -16,7 +16,7 @@ public class Carte {
     private int semaine, jour, heure_d, heure_f, coursID, seanceID, etat;
     
     /**
-     *
+     *  Default Constructeur
      */
     public Carte(){
         cours = "";
@@ -33,7 +33,8 @@ public class Carte {
     }
     
     /**
-     *
+     * Constructeur
+     * 
      * @param r_cours
      * @param r_type
      * @param r_profs
@@ -67,7 +68,8 @@ public class Carte {
     }
     
     /**
-     *
+     * Deuxième constructeur
+     * 
      * @param r_semaine
      * @param r_h_d
      * @param r_h_f
@@ -92,7 +94,8 @@ public class Carte {
     }
     
     /**
-     *
+     * Setter cours
+     * 
      * @param c
      */
     public void setCours(String c){
@@ -100,7 +103,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter type
+     * 
      * @param c
      */
     public void setType(String c){
@@ -108,7 +112,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter sites
+     * 
      * @param c
      */
     public void setSite(ArrayList c){
@@ -116,7 +121,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter salles
+     * 
      * @param c
      */
     public void setSalle(ArrayList c){
@@ -124,7 +130,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter profs
+     * 
      * @param c
      */
     public void setProf(ArrayList c){
@@ -132,7 +139,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter groupes
+     * 
      * @param c
      */
     public void setGroupe(ArrayList c){
@@ -140,7 +148,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Setter semaine
+     * 
      * @param c
      */
     public void setSemaine(int c){
@@ -148,7 +157,8 @@ public class Carte {
     }
     
     /**
-     *
+     * Getter cours
+     * 
      * @return
      */
     public String getCours(){
@@ -156,7 +166,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Getter type
+     * 
      * @return
      */
     public String getType(){
@@ -164,8 +175,9 @@ public class Carte {
     }
 
     /**
-     *
-     * @return
+     * Getter String all sites
+     * 
+     * @return string
      */
     public String getSite(){
         String finalString = "";
@@ -177,7 +189,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Getter sites
+     * 
      * @return
      */
     public ArrayList getSites(){
@@ -185,7 +198,8 @@ public class Carte {
     }
 
     /**
-     *
+     * Getter string all Salles
+     * 
      * @return
      */
     public String getSalle(){
@@ -312,7 +326,7 @@ public class Carte {
     }
 
     /**
-     *
+     * Comparateur
      */
     public static Comparator<Carte> carteComparator = (Carte s1, Carte s2) -> {
         if(s1.getSemaine()==s2.getSemaine()){

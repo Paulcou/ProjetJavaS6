@@ -17,7 +17,8 @@ public class Recap {
     private double nbHeures;
     
     /**
-     *
+     * Constructeur
+     * 
      * @param r_matiere
      * @param r_groupe
      * @param r_nb
@@ -29,7 +30,8 @@ public class Recap {
     }
     
     /**
-     *
+     * Setter nbHeures
+     * 
      * @param plus
      */
     public void setNBH(double plus){
@@ -37,7 +39,8 @@ public class Recap {
     }
     
     /**
-     *
+     * Getter matiere
+     * 
      * @return
      */
     public String getMatiere(){
@@ -45,7 +48,8 @@ public class Recap {
     }
     
     /**
-     *
+     * Getter groupe
+     * 
      * @return
      */
     public String getGroupe(){
@@ -53,7 +57,8 @@ public class Recap {
     }
     
     /**
-     *
+     * Getter nbHeures
+     * 
      * @return
      */
     public double getNBH(){
@@ -61,7 +66,8 @@ public class Recap {
     }
     
     /**
-     *
+     * Comparateur
+     * 
      */
     public static Comparator<Recap> recapComparator = (Recap s1, Recap s2) -> {
         return Integer.parseInt(s1.getMatiere()) - Integer.parseInt(s2.getMatiere());
