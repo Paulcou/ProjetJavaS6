@@ -762,6 +762,30 @@ public class Connexion {
             }
         }
         
+        int capaciteDemandee = 0;
+        
+        for(int i = 0; i<allGroupesById.size(); i++){
+            
+            boolean check = true;
+            
+            for(int j=0; j<i; j++){
+                if(allGroupesById.get(j)==allGroupesById.get(i)){
+                    check = false;
+                }
+            }
+            
+            if(check){ 
+                String myQuery = ("Select * from etudiant where etudiant.ID_Groupe = '"+(int)allGroupesById.get(i)+"'");
+                
+                rset = stmt.executeQuery(myQuery);
+                
+                while(rset.next())
+                {
+                    capaciteDemandee++;
+                } 
+            }
+        }
+        
         ArrayList allProfsById;
         allProfsById = new ArrayList();
         
@@ -799,8 +823,31 @@ public class Connexion {
                 allSallesById.add(9);
             }else{
                 allSallesById.add(10);
+            } 
+        }
+        
+        int capaciteDonne = 0;
+        
+        for(int i = 0; i<allSallesById.size(); i++){
+            
+            boolean check = true;
+            
+            for(int j=0; j<i; j++){
+                if(allSallesById.get(j)==allSallesById.get(i)){
+                    check = false;
+                }
             }
             
+            if(check){ 
+                String myQuery = ("Select * from salle where salle.ID = '"+(int)allSallesById.get(i)+"'");
+                
+                rset = stmt.executeQuery(myQuery);
+                
+                while(rset.next())
+                {
+                    capaciteDonne += rset.getInt("Capacite");
+                } 
+            }
         }
         
         String myQuery = ("Select * from seance where seance.Date = '"+date+"'"); //AND (seance.Heure_Debut = '"+heure_d+"' OR seance.Heure_Fin = '"+heure_f+"')");
@@ -903,6 +950,11 @@ public class Connexion {
         
         if(!allSallesId.isEmpty()){
             except.sallesNonLibres(allSallesId);
+            finalInt = false;
+        }
+        
+        if(capaciteDemandee>capaciteDonne){
+            except.capacite();
             finalInt = false;
         }
         

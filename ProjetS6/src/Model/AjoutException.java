@@ -100,4 +100,11 @@ public class AjoutException extends Exception {
     public void dimanche(){
         JOptionPane.showMessageDialog(null, "Pas de cours le dimanche.", "Information", JOptionPane.INFORMATION_MESSAGE);
     }
+    
+    /**
+     *
+     */
+    public void capacite(){
+        JOptionPane.showMessageDialog(null, "Capacité insuffisante.", "Information", JOptionPane.INFORMATION_MESSAGE);
+    }
 }
