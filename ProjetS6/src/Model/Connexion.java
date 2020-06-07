@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -100,7 +99,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui check si le login et le mdp concordent, sinon retourne en fonction de l'erreur un int
+     * 
      * @param login
      * @param pwd
      * @return
@@ -143,7 +143,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode pour récupérer le droit de l'utilisateur en fonction de son email
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -166,7 +167,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode pour récupérer le nom de l'utilisateur en fonction de son email.
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -190,7 +192,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui récupère le groupe de l'utilisateur si c'est un élève 
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -233,7 +236,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui récupère toute les séances de l'utilisateur ou de celui recherché
+     * 
      * @param login
      * @return
      * @throws SQLException
@@ -305,7 +309,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui renvoie une séance complète en fonction de son id recçu en param.
+     * 
      * @param id
      * @return
      * @throws SQLException
@@ -525,7 +530,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Return l'email de la personne recherchée. 
+     * 
      * @param searchString
      * @return
      * @throws SQLException
@@ -547,7 +553,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode pour ajouter une séance en bdd.
+     * 
      * @param date
      * @param heure_d
      * @param heure_f
@@ -692,7 +699,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui check si tous les éléments de la nouvelle séance sont utilisables ou non.
+     * 
      * @param date
      * @param heure_d
      * @param heure_f
@@ -1030,7 +1038,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Retourne les noms de salle en fonction de leur id.
+     * 
      * @param ids
      * @return
      * @throws SQLException
@@ -1064,7 +1073,8 @@ public class Connexion {
     }
 
     /**
-     *
+     * Méthode qui supprime une séance en bdd.
+     * 
      * @param id
      * @throws java.sql.SQLException
      */
@@ -1089,7 +1099,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode qui renvoie toutes les salles libres. 
+     * 
      * @param week
      * @return
      * @throws SQLException
@@ -1161,7 +1172,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée pour les stats qui permets de récupérer des objets récap sur une période.
+     * 
      * @param dates
      * @param email
      * @return
@@ -1250,7 +1262,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée pour les stats. Retourne des objets récap pour obtenir le nombre d'heure par matières.
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -1340,7 +1353,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée pour les stats. Retourne des objets récap pour obtenir le nombre d'heure par type (élèves) ou par groupe (prof).
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -1459,7 +1473,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée pour les statistiques. Retourne des objets récap pour obtenir le nombre d'heure de cours par semaines.
+     * 
      * @param email
      * @return
      * @throws SQLException
@@ -1580,7 +1595,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée pour les stats. Retounrne des objets récap pour obtenir le taux d'occupation des locaux en pourcentage par semaine.
+     * 
      * @return
      * @throws SQLException
      */
@@ -1678,7 +1694,8 @@ public class Connexion {
     }
     
     /**
-     *
+     * Méthode utilisée dans la recherche des séances par salle.
+     * 
      * @param salle
      * @return
      * @throws SQLException

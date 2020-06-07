@@ -453,6 +453,25 @@ public class PageModifierSeance extends JFrame{
             }
             
         });
+        
+        JButton btnSupp = new JButton("Supprimer la séance");
+        c.insets = new Insets(3, 0, 3, 0);
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 0.5;
+        containerBtn.add(btnSupp,c);
+        
+        btnSupp.addActionListener((java.awt.event.ActionEvent evt) -> {
+            try {
+                myConnexion.supprimerSeance(seanceId);
+                this.setVisible(false);
+                new PageEdt(emailUser, searchEmail);
+                
+            } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(PageAjouterSeance.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        });
     }
 }
 
